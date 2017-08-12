@@ -1,0 +1,38 @@
+<div *ngIf="category$ | async as category">
+  <div *ngIf="year$ | async as year">
+    <span *ngIf="category.name; then hasName; else noName"></span>
+    <ng-template #hasName>
+      <h3>เอกสารประเภท{{category.name}} ปี พ.ศ. {{year.buddhist_year}}</h3>
+    </ng-template>
+    <ng-template #noName>
+      <h3>เอกสารปี พ.ศ. {{year.buddhist_year}}</h3>
+    </ng-template>
+    <a class="waves-effect waves-light btn" [routerLink]="['new']">สร้างเอกสารใหม่</a>
+    <table class="responsive-table stripped">
+      <thead>
+        <tr>
+          <th>ที่</th>
+          <th>ชื่อเอกสาร</th>
+          <th>หน่วยงาน</th>
+          <th>ผู้ขอ</th>
+          <th>เวลา</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let document of documents$ | async as documents">
+          <span *ngIf="category.prefix; then hasPrefix; else noPrefix"></span>
+          <ng-template #hasPrefix>
+            <td>{{category.prefix}} {{document.number}}/{{year.buddhist_year}}</td>
+          </ng-template>
+          <ng-template #noPrefix>
+            <td>{{document.number}}/{{year.buddhist_year}}</td>
+          </ng-template>
+          <td>{{document.name}}</td>
+          <td>{{document.division.name}}</td>
+          <td>{{document.user.profile.displayName}}</td>
+          <td>{{document.timestamp | time}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

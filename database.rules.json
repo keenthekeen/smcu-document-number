@@ -1,0 +1,17 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "data": {
+      "documents": {
+        "$year": {
+          "$category": {
+            "documents": {
+              ".indexOn": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}
