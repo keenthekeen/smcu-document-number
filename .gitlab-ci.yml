@@ -14,4 +14,4 @@ deploy:
   stage: deploy
   script:
     - npm i
-    - npx firebase deploy --only hosting
+    - npx firebase deploy --only hosting --token $FIREBASE_TOKEN
