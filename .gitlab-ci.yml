@@ -8,10 +8,17 @@ build:
     paths:
       - dist/
     expire_in: 1 hour
+  cache:
+    policy: push
+    paths:
+      - node_modules/
 
 deploy:
   image: node:8-alpine
   stage: deploy
   script:
-    - npm i
     - npx firebase deploy --only hosting --token $FIREBASE_TOKEN
+  cache:
+    policy: pull
+    paths:
+      - node_modules/
