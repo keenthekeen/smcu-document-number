@@ -1,0 +1,17 @@
+build:
+  image: node:8-alpine
+  stage: build
+  script:
+    - npm i
+    - npx ng build -prod
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+
+deploy:
+  image: node:8-alpine
+  stage: deploy
+  script:
+    - npm i
+    - npx firebase deploy --only hosting
