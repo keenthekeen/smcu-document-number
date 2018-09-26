@@ -1,10 +1,4 @@
-@import '~materialize-css/sass/components/color';
-
-$roboto-font-path: "~materialize-css/dist/fonts/roboto/";
-$primary-color: color("green", "darken-2");
-$secondary-color: color("light-blue", "base");
-
-@import '~materialize-css/sass/materialize';
+// No more Materialize CSS here lol
 
 html{
   font-family: "Roboto", "Trirong", sans-serif;
