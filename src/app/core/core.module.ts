@@ -1,9 +1,8 @@
-import { AuthService } from './auth.service';
-import { environment } from './../../environments/environment';
 import { NgModule } from '@angular/core';
-import { AngularFireModule } from 'angularfire2';
-import { AngularFireAuthModule } from 'angularfire2/auth'
-import { AngularFireDatabaseModule } from 'angularfire2/database';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFireDatabaseModule } from '@angular/fire/database';
+import { environment } from './../../environments/environment';
 
 @NgModule({
   imports: [
@@ -12,6 +11,6 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
     AngularFireDatabaseModule
   ],
   declarations: [],
-  providers: [AuthService]
+  providers: []
 })
 export class CoreModule { }

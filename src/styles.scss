@@ -1,2 +1,7 @@
-@import 'materialize';
+@import '../node_modules/bulma/sass/utilities/initial-variables';
+
+$family-sans-serif: 'Roboto', 'Trirong', sans-serif;
+
+@import '../node_modules/bulma/bulma';
+
 @import 'fa';

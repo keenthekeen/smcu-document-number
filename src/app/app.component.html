@@ -1,17 +1,27 @@
-<nav *ngIf="((user$ | async) || 1) as user">
-  <div class="nav-wrapper container">
-    <a [routerLink]="['/']"class="brand-logo">เอกสาร สพจ.</a>
-    <a class="button-collapse" materialize="sideNav" data-activates="sidenav"><i class="material-icons">menu</i></a>
-    <ul class="right hide-on-med-and-down">
-      <li *ngIf="user === 1"><a (click)="login()">Sign In</a></li>
-      <li *ngIf="user !== 1"><a (click)="logout()">Sign Out</a></li>
-    </ul>
-    <ul class="side-nav" id="sidenav">
-      <li *ngIf="user === 1"><a (click)="login()">Sign In</a></li>
-      <li *ngIf="user !== 1"><a (click)="logout()">Sign Out</a></li>
-    </ul>
-  </div>
-</nav>
 <div class="container">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a routerLink="/" class="navbar-item">เอกสาร สพจ.</a>
+      <div class="navbar-burger" [class.is-active]="burgerStatus" (click)="toggleBurger()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <div class="navbar-menu" [class.is-active]="burgerStatus">
+      <div class="navbar-end">
+        <ng-container *ngIf="user$ | async as user; then signedIn; else notSignedIn">
+        </ng-container>
+        <ng-template let-user #signedIn>
+          <div class="navbar-item">สวัสดี {{user.displayName}}</div>
+          <a class="navbar-item" (click)="logout()">ออกจากระบบ</a>
+        </ng-template>
+        <ng-template #notSignedIn>
+          <a class="navbar-item" (click)="login()">เข้าสู่ระบบ</a>
+        </ng-template>
+      </div>
+    </div>
+  </nav>
   <router-outlet></router-outlet>
 </div>
+

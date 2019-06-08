@@ -1,8 +1,8 @@
-import { AuthService } from './core/auth.service';
-import { AngularFireAuth } from 'angularfire2/auth';
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { AngularFireAuth } from '@angular/fire/auth';
 import * as firebase from 'firebase/app';
+import { Observable } from 'rxjs';
+import { AuthService } from './core/auth.service';
 
 @Component({
   selector: 'smcu-root',
@@ -10,15 +10,17 @@ import * as firebase from 'firebase/app';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+  burgerStatus = false;
   user$: Observable<firebase.User>;
 
-  constructor(
-    private afa: AngularFireAuth,
-    private auth: AuthService
-  ) { }
+  constructor(private auth: AuthService, private afa: AngularFireAuth) {}
 
   ngOnInit() {
     this.user$ = this.afa.authState;
+  }
+
+  toggleBurger() {
+    this.burgerStatus = !this.burgerStatus;
   }
 
   login() {

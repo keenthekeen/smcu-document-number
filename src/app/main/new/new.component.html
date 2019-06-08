@@ -1,34 +1,40 @@
-<div *ngIf="category$ | async as category">
-  <div *ngIf="year$ | async as year">
+<ng-container *ngIf="category$ | async as category">
+  <ng-container *ngIf="year$ | async as year">
     <span *ngIf="category.name; then hasName; else noName"></span>
     <ng-template #hasName>
-      <h3>สร้างเอกสารประเภท{{category.name}} ปี พ.ศ. {{year.buddhist_year}}</h3>
+      <h3 class="is-size-3">สร้างเอกสารประเภท{{category.name}} ปี พ.ศ. {{year.buddhist_year}}</h3>
     </ng-template>
     <ng-template #noName>
-      <h3>สร้างเอกสารปี พ.ศ. {{year.buddhist_year}}</h3>
+      <h3 class="is-size-3">สร้างเอกสารปี พ.ศ. {{year.buddhist_year}}</h3>
     </ng-template>
-    <div class="row">
-      <div class="col s6 offset-s3">
-        <form [formGroup]="form" materialize (ngSubmit)="submit()" novalidate>
-          <div class="row">
-            <div class="input-field col s12">
-              <input id="name" type="text" class="validate" formControlName="name">
-              <label for="name">ชื่อเอกสาร</label>
+    <div class="columns">
+      <div class="column is-4 is-offset-4">
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="field">
+            <label for="name" class="label">ชื่อเอกสาร</label>
+            <div class="control">
+              <input id="name" type="text" formControlName="name" class="input">
             </div>
           </div>
-          <div class="input-field col s12">
-            <select materialize="material_select" formControlName="divisionId">
-              <option *ngFor="let division of divisions$ | async as divisions" [value]="division.value">{{division.name}}</option>
-            </select>
-            <label>หน่วยงาน</label>
+          <div class="field">
+            <label for="division" class="label">หน่วยงาน</label>
+            <div class="control is-expanded">
+              <div class="select is-fullwidth">
+                <select formControlName="divisionId" id="division">
+                  <option *ngFor="let division of divisions$ | async as divisions" [value]="division.value">{{division.name}}</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div class="col s12">
-            <button class="btn waves-effect waves-light" type="submit" [disabled]="form.disabled">Submit
-              <i class="material-icons right">send</i>
-            </button>
+          <div class="field is-grouped is-grouped-centered">
+            <div class="control">
+              <button type="submit" [disabled]="form.disabled" class="button is-primary">Submit
+                <i class="material-icons right">send</i>
+              </button>
+            </div>
           </div>
         </form>
       </div>
     </div>
-  </div>
-</div>
+  </ng-container>
+</ng-container>

@@ -12,7 +12,7 @@ const routes: Routes = [
   },
   {
     path: 'main',
-    loadChildren: './main/main.module.ts#MainModule',
+    loadChildren: './main/main.module#MainModule',
     canLoad: [UserGuard]
   }
 ];

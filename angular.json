@@ -22,10 +22,7 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": [
-              "node_modules/jquery/dist/jquery.js",
-              "node_modules/materialize-css/dist/js/materialize.js"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -71,10 +68,7 @@
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
-            "scripts": [
-              "node_modules/jquery/dist/jquery.js",
-              "node_modules/materialize-css/dist/js/materialize.js"
-            ],
+            "scripts": [],
             "styles": [
               "src/styles.scss"
             ],

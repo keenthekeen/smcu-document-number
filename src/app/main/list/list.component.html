@@ -2,13 +2,13 @@
   <div *ngIf="year$ | async as year">
     <span *ngIf="category.name; then hasName; else noName"></span>
     <ng-template #hasName>
-      <h3>เอกสารประเภท{{category.name}} ปี พ.ศ. {{year.buddhist_year}}</h3>
+      <h3 class="is-size-3">เอกสารประเภท{{category.name}} ปี พ.ศ. {{year.buddhist_year}}</h3>
     </ng-template>
     <ng-template #noName>
-      <h3>เอกสารปี พ.ศ. {{year.buddhist_year}}</h3>
+      <h3 class="is-size-3">เอกสารปี พ.ศ. {{year.buddhist_year}}</h3>
     </ng-template>
-    <a class="waves-effect waves-light btn" [routerLink]="['new']">สร้างเอกสารใหม่</a>
-    <table class="responsive-table stripped">
+    <a class="button is-primary" [routerLink]="['new']">สร้างเอกสารใหม่</a>
+    <table class="table is-fullwidth">
       <thead>
         <tr>
           <th>ที่</th>
