@@ -6,7 +6,7 @@ import {AngularFireDatabase} from '@angular/fire/database';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {HttpClient} from '@angular/common/http';
 import {combineLatest, Observable} from 'rxjs';
-import {first, map, switchMap, tap} from 'rxjs/operators';
+import {first, map, switchMap} from 'rxjs/operators';
 import * as Docxtemplater from 'docxtemplater';
 import {saveAs} from 'file-saver';
 import {ThaiDatePipe} from '../../thai-date.pipe';
@@ -25,7 +25,8 @@ export class NewComponent implements OnInit, AfterViewChecked {
   year$: Observable<any>;
   category$: Observable<any>;
   divisions$: Observable<{ name: string, value: number }[]>;
-  signers$: Observable<any>[] = [];
+  signers: { name: string, title: string, picture_url: string | null }[][] = [[], [], [], []];
+  initializedSignerSelect: boolean;
   numberForm: FormGroup;
   docForm: FormGroup;
 
@@ -59,7 +60,11 @@ export class NewComponent implements OnInit, AfterViewChecked {
     this.divisions$ = this.afd.list('data/divisions').valueChanges()
       .pipe(map((divisions: any[]) => divisions.filter((division) => division.value !== 0)));
     [1, 2, 3].forEach(num => {
-      this.signers$.push(this.afd.list(`data/signers/level_${num}`).valueChanges().pipe(first()));
+      this.afd.list<{ name: string, title: string, picture_url: string | null }>(`data/signers/level_${num}`)
+        .valueChanges().pipe(first())
+        .subscribe(data => {
+          this.signers[num] = data;
+        });
     });
     this.numberForm = new FormGroup({
       name: new FormControl('', Validators.required),
@@ -67,29 +72,38 @@ export class NewComponent implements OnInit, AfterViewChecked {
     });
     this.docForm = new FormGroup({
       name: new FormControl('', Validators.required),
-      divisionId: new FormControl(1, Validators.required),
+      divisionId: new FormControl('', Validators.required),
       to: new FormControl('', Validators.required),
-      insideTo: new FormControl(),
+      insideTo: new FormControl(true),
       attachment: new FormControl(''),
       paragraph_1: new FormControl('', Validators.required),
       paragraph_2: new FormControl('', Validators.required),
       paragraph_3: new FormControl('', Validators.required),
-      signer_1: new FormControl(''),
-      signer_2: new FormControl(''),
-      signer_3: new FormControl(''),
-      hasAssocSign: new FormControl('')
+      signer_1: new FormControl('', Validators.required),
+      signer_2: new FormControl('', Validators.required),
+      signer_3: new FormControl('', Validators.required),
+      contact_name: new FormControl('', Validators.required),
+      contact_phone: new FormControl('', Validators.required),
+      hasAssocSign: new FormControl(false),
+      wantIssue: new FormControl({value: false, disabled: true})
     });
-    this.signers$.forEach(s => {
-      s.subscribe(d => {
-        M.FormSelect.init(document.querySelectorAll('select'), {});
-      })
-    })
   }
 
   ngAfterViewChecked(): void {
-    console.log('AfterViewChecked');
     M.Collapsible.init(document.querySelectorAll('.collapsible'), {});
-    M.FormSelect.init(document.querySelectorAll('select'), {});
+    if (this.signers[1].length && this.signers[2].length && this.signers[3].length && !this.initializedSignerSelect) {
+      setTimeout(_ => {
+        M.FormSelect.init(document.querySelectorAll('select'), {});
+        M.Autocomplete.init(document.getElementById('gTo'), {
+          data: {
+            'รองคณบดีฝ่ายกิจการนิสิต': 'https://firebasestorage.googleapis.com/v0/b/smcu-document-number.appspot.com/o/board-face%2Fpongsak.jpg?alt=media&token=20b6b894-989e-42d0-98d7-d4585bc7ddd2',
+            'รองคณบดีฝ่ายบริหาร': null,
+            'รองผู้อำนวยการโรงพยาบาลจุฬาลงกรณ์ ฝ่ายกายภาพ': null
+          }
+        });
+      }, 1000);
+      this.initializedSignerSelect = true;
+    }
   }
 
   submitNumber() {
@@ -113,9 +127,23 @@ export class NewComponent implements OnInit, AfterViewChecked {
     }
   }
 
-  submitDoc() {
+  async submitDoc() {
+    // Cannot add associate dean's field if the recipient is himself
+    if (this.docForm.value.hasAssocSign && this.docForm.value.to === 'รองคณบดีฝ่ายกิจการนิสิต') {
+      this.docForm.patchValue({hasAssocSign: false});
+    }
+
     if (this.docForm.valid) {
       this.docForm.disable();
+      // Build an array of signers' info
+      const signers = [];
+      [1, 2, 3].forEach(num => {
+        const formValue = this.docForm.value['signer_' + num];
+        if (formValue !== 'skip') {
+          const formValueExtracted = formValue.split('/');
+          signers.push({name: formValueExtracted[0], title: formValueExtracted[1]});
+        }
+      });
       JSZipUtils.getBinaryContent('/assets/template-in.docx', (error, content) => {
         if (error) { throw error; }
         const zip = new JSZip(content);
@@ -124,10 +152,15 @@ export class NewComponent implements OnInit, AfterViewChecked {
         doc.setOptions({linebreaks: true});
         doc.setData({
           ...this.docForm.value,
+          number: '     /',
           date: (new ThaiDatePipe()).transform(new Date(), 'medium'),
-          close: (this.docForm.value.insideTo === 'in') ? 'ด้วยความเคารพอย่างสูง' : 'ขอแสดงความนับถือ',
-          signer_3_name: '(นายณัฐภัทร อนุดวง)',
-          signer_3_title: 'นายกสโมสรนิสิต\nคณะแพทยศาสตร์ จุฬาลงกรณ์มหาวิทยาลัย'
+          close: this.docForm.value.insideTo ? 'ด้วยความเคารพอย่างสูง' : 'ขอแสดงความนับถือ',
+          signer_1_name: signers[0] ? ('(' + signers[0].name + ')') : '',
+          signer_1_title: signers[0] ? signers[0].title : '',
+          signer_2_name: signers[1] ? ('(' + signers[1].name + ')') : '',
+          signer_2_title: signers[1] ? signers[1].title : '',
+          signer_3_name: signers[2] ? ('(' + signers[2].name + ')') : '',
+          signer_3_title: signers[2] ? signers[2].title : ''
         });
         try {
           // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
