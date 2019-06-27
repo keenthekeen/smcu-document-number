@@ -6,11 +6,12 @@ import {AngularFireDatabase} from '@angular/fire/database';
 import {AngularFireAuth} from '@angular/fire/auth';
 import {HttpClient} from '@angular/common/http';
 import {combineLatest, Observable} from 'rxjs';
-import {first, map, switchMap} from 'rxjs/operators';
+import {finalize, first, map, switchMap} from 'rxjs/operators';
 import * as Docxtemplater from 'docxtemplater';
 import {saveAs} from 'file-saver';
 import {ThaiDatePipe} from '../../thai-date.pipe';
 import * as M from 'materialize-css';
+import {AngularFireStorage} from '@angular/fire/storage';
 
 declare var JSZip: any;
 declare var JSZipUtils: any;
@@ -30,13 +31,16 @@ export class NewComponent implements OnInit, AfterViewChecked {
   numberForm: FormGroup;
   docForm: FormGroup;
   authState: firebase.User;
+  selectedFile: File = null;
+  uploadPercent: Observable<number>;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private afd: AngularFireDatabase,
     private http: HttpClient,
-    private afa: AngularFireAuth) {
+    private afa: AngularFireAuth,
+    private storage: AngularFireStorage) {
   }
 
   ngOnInit() {
@@ -122,27 +126,50 @@ export class NewComponent implements OnInit, AfterViewChecked {
             'รองผู้อำนวยการโรงพยาบาลจุฬาลงกรณ์ ฝ่ายกายภาพ': null
           }
         });
-      }, 1000);
+      }, 1200);
       this.initializedSignerSelect = true;
     }
   }
 
+  onFileChange(event) {
+    this.selectedFile = <File>event.target.files[0];
+  }
+
   submitNumber() {
     if (this.numberForm.valid) {
+      if (!this.selectedFile) {
+        M.toast({html: 'กรุณาเลือกไฟล์'});
+        return;
+      }
       this.numberForm.disable();
       combineLatest([this.year$, this.category$]).pipe(first()).subscribe(([year, category]) => {
-        this.afa.authState.pipe(first()).subscribe((user) => {
-          this.http.post(`${environment.baseUrl}/submit`, {
-            name: this.numberForm.value.name,
-            divisionId: this.numberForm.value.divisionId,
-            year: year.christian_year,
-            category: category.value,
-            uid: user.uid
-          }).subscribe((res) => {
-            if (res) {
-              this.router.navigate(['..'], {relativeTo: this.route});
-            }
-          });
+        this.afa.idToken.pipe(first()).subscribe((idToken) => {
+          // Upload file
+          const filePath = 'document/' + year.christian_year + '/' + Date.now() + '-' + Math.round(Math.random() * 100);
+          const task = this.storage.upload(filePath, this.selectedFile);
+
+          // observe percentage changes
+          this.uploadPercent = task.percentageChanges();
+          // get notified when the download URL is available
+          task.snapshotChanges().pipe(
+            finalize(() => {
+              // this.downloadURL = fileRef.getDownloadURL()
+
+              this.http.post(`${environment.baseUrl}/submit`, {
+                name: this.numberForm.value.name,
+                divisionId: this.numberForm.value.divisionId,
+                year: year.christian_year,
+                category: category.value,
+                idToken: idToken,
+                filePath: filePath
+              }).subscribe((res) => {
+                if (res) {
+                  // Created document
+                  M.toast({html: 'บันทึกข้อมูลเรียบร้อย'});
+                  this.router.navigate(['..'], {relativeTo: this.route});
+                }
+              });
+            })).subscribe();
         });
       });
     }
@@ -165,7 +192,9 @@ export class NewComponent implements OnInit, AfterViewChecked {
         }
       });
       JSZipUtils.getBinaryContent('/assets/template.docx', (error, content) => {
-        if (error) { throw error; }
+        if (error) {
+          throw error;
+        }
         const zip = new JSZip(content);
         const doc = new Docxtemplater();
         doc.loadZip(zip);
