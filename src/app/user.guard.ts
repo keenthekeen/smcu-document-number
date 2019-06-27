@@ -3,12 +3,13 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, CanLoad, Rout
 import {AngularFireAuth} from '@angular/fire/auth';
 import {AngularFireDatabase} from '@angular/fire/database';
 import {Observable, of} from 'rxjs';
-import {first, map, switchMap} from 'rxjs/operators';
+import {first, switchMap} from 'rxjs/operators';
 
 @Injectable()
 export class UserGuard implements CanActivate, CanLoad {
 
-  constructor(private afa: AngularFireAuth, private router: Router, private afd: AngularFireDatabase) { }
+  constructor(private afa: AngularFireAuth, private router: Router, private afd: AngularFireDatabase) {
+  }
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -24,17 +25,8 @@ export class UserGuard implements CanActivate, CanLoad {
 
   userExist() {
     return this.afa.authState.pipe(first()).pipe(switchMap((authState) => {
-      if (authState && authState.email.endsWith('docchula.com')) {
-        return this.afd.object(`data/users/${authState.uid}/profile`).valueChanges().pipe(first(), map((data) => {
-          if (!data) {
-            this.afd.database.ref(`data/users/${authState.uid}/profile`).set({
-              displayName: authState.displayName,
-              uid: authState.uid,
-              email: authState.email
-            });
-          }
-          return true;
-        }));
+      if (authState && authState.emailVerified && authState.email.endsWith('docchula.com')) {
+        return of(true);
       } else {
         this.router.navigate(['/']);
         return of(false);

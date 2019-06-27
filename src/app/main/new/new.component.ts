@@ -107,6 +107,13 @@ export class NewComponent implements OnInit, AfterViewChecked {
               contact_phone: data.phone
             });
           } else {
+            if (!data) {
+              this.afd.database.ref(`data/users/${authState.uid}/profile`).set({
+                displayName: authState.displayName,
+                uid: authState.uid,
+                email: authState.email
+              });
+            }
             this.authState = authState;
           }
         });
