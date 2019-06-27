@@ -3,6 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {AngularFireDatabase} from '@angular/fire/database';
 import {Observable, ReplaySubject} from 'rxjs';
 import {first, map, switchMap} from 'rxjs/operators';
+import {AngularFireStorage} from '@angular/fire/storage';
 
 declare var M: any;
 
@@ -17,8 +18,13 @@ export class ListComponent implements OnInit, AfterViewChecked {
   documents$: Observable<any[]>;
   year$: Observable<any>;
   category$: Observable<any>;
+  announcement$: Observable<string>;
 
-  constructor(private route: ActivatedRoute, private router: Router, private afd: AngularFireDatabase) {
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private afd: AngularFireDatabase,
+    private storage: AngularFireStorage) {
   }
 
   ngOnInit() {
@@ -64,9 +70,16 @@ export class ListComponent implements OnInit, AfterViewChecked {
     this.category$ = this.params$.pipe(switchMap((params) => {
       return this.afd.object(`data/categories/${params[1]}`).valueChanges();
     }));
+    this.announcement$ = this.afd.object<string>('data/announcement').valueChanges();
   }
 
   ngAfterViewChecked(): void {
     M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'), {});
+  }
+
+  downloadAttachment(path) {
+    this.storage.ref(path).getDownloadURL().pipe(first()).subscribe(url => {
+      window.location.href = url;
+    });
   }
 }

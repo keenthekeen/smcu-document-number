@@ -1,3 +1,6 @@
+<div *ngIf="announcement$ | async as announcement" class="announcement yellow lighten-4">
+  {{ announcement }}
+</div>
 <div *ngIf="category$ | async as category">
   <div *ngIf="year$ | async as year">
     <span *ngIf="category.name; then hasName; else noName"></span>
@@ -9,13 +12,14 @@
     </ng-template>
     <table class="striped">
       <thead>
-        <tr>
-          <th>ที่</th>
-          <th>หัวเรื่อง</th>
-          <th>หน่วยงาน</th>
-          <th>ผู้ขอ</th>
-          <th>เวลา</th>
-        </tr>
+      <tr>
+        <th>ที่</th>
+        <th>หัวเรื่อง</th>
+        <th>หน่วยงาน</th>
+        <th>ผู้ขอ</th>
+        <th>เวลา</th>
+        <th>สถานะ</th>
+      </tr>
       </thead>
       <tbody>
         <tr *ngFor="let document of documents$ | async as documents">
@@ -30,6 +34,12 @@
           <td>{{document.division.name}}</td>
           <td>{{document.user.profile.displayName}}</td>
           <td>{{document.timestamp | date:"d MMMM y, HH:mm"}}</td>
+          <td>
+            {{document.status || "-"}}
+            <a *ngIf="document.filePath" (click)="downloadAttachment(document.filePath)">
+              <i class="material-icons">save_alt</i>
+            </a>
+          </td>
         </tr>
       </tbody>
     </table>
