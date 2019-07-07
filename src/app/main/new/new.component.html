@@ -11,10 +11,13 @@
       <div class="col s12 m10 offset-m1">
 
         <ul class="collapsible">
-          <li>
+          <li class="active">
             <div class="collapsible-header"><i class="material-icons">add</i>ฉันร่างหนังสือไว้แล้ว ต้องการเพียงเลขที่หนังสือ</div>
             <div class="collapsible-body">
-              <span>ท่านจะต้องร่างหนังสือไว้เสร็จเรียบร้อยแล้ว เหลือเพียงเลขหนังสือเท่านั้น จึงจะดำเนินการต่อ</span>
+              <ul class="browser-default">
+                <li>ท่านจะต้องร่างหนังสือไว้เสร็จเรียบร้อยแล้ว เหลือเพียงเลขหนังสือเท่านั้น จึงจะดำเนินการต่อ เนื่องจากต้องส่งไฟล์เอกสารด้วย</li>
+                <li>กรุณาส่งหนังสือทันทีหลังจากขอออกเลขที่หนังสือ ไม่เกิน 1 - 2 วันทำการ</li>
+              </ul>
               <form [formGroup]="numberForm" (ngSubmit)="submitNumber()">
                 <div class="row">
                   <div class="input-field col s12">
