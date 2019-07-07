@@ -6,7 +6,7 @@ import {finalize, first, map, switchMap, throttle} from 'rxjs/operators';
 import {AngularFireStorage} from '@angular/fire/storage';
 import {AngularFireAuth} from '@angular/fire/auth';
 import * as M from 'materialize-css';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {UserProfile} from '../../user-profile';
 
 @Component({
@@ -18,6 +18,7 @@ export class ListComponent implements OnInit, AfterViewInit {
 
   @ViewChild('floatBtn', {static: false}) floatBtn: ElementRef;
   @ViewChild('modalStatus', {static: false}) modalStatus: ElementRef;
+  @ViewChild('modalBatchStatus', {static: false}) modalBatchStatus: ElementRef;
 
   params$: ReplaySubject<[string, string]>;
   documents$: Observable<any[]>;
@@ -27,9 +28,12 @@ export class ListComponent implements OnInit, AfterViewInit {
   focusedDoc: any;
   modalStatusControl: any;
   statusForm: FormGroup;
+  modalBatchStatusControl: any;
+  batchStatusForm: FormGroup;
   selectedFile: File = null;
   uploadPercent: Observable<number>;
   user: UserProfile;
+  selectedDocs: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -40,6 +44,9 @@ export class ListComponent implements OnInit, AfterViewInit {
     formBuilder: FormBuilder) {
     this.statusForm = formBuilder.group({
       status: ['']
+    });
+    this.batchStatusForm = formBuilder.group({
+      status: new FormControl('', Validators.required)
     });
   }
 
@@ -103,6 +110,7 @@ export class ListComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     M.FloatingActionButton.init(this.floatBtn.nativeElement, {});
     this.modalStatusControl = new M.Modal(this.modalStatus.nativeElement, {});
+    this.modalBatchStatusControl = new M.Modal(this.modalBatchStatus.nativeElement, {});
   }
 
   downloadAttachment(path) {
@@ -157,6 +165,34 @@ export class ListComponent implements OnInit, AfterViewInit {
       }
 
       this.modalStatusControl.close();
+    }
+  }
+
+  onTick(event, document) {
+    if (event.target.checked) {
+      this.selectedDocs.push(document);
+    } else {
+      this.selectedDocs = this.selectedDocs.filter(doc => doc.$key !== document.$key);
+    }
+  }
+
+  openBatchStatusModal() {
+    this.selectedDocs = this.selectedDocs.sort((a, b) => a.number - b.number);
+    this.modalBatchStatusControl.open();
+  }
+
+  saveBatchStatus() {
+    if (this.batchStatusForm.valid && this.selectedDocs.length > 1) {
+      for (const selectedDoc of this.selectedDocs) {
+        this.afd.database
+          .ref(`data/documents/${selectedDoc.$year}/${selectedDoc.$category}/documents/${selectedDoc.$key}`)
+          .update({
+            status: this.batchStatusForm.value.status
+          }).then(() => {
+          M.toast({html: 'แก้ไขสถานะหนังสือที่ ' + selectedDoc.number + '/' + selectedDoc.$year + ' แล้ว'});
+        });
+      }
+      this.modalBatchStatusControl.close();
     }
   }
 }
