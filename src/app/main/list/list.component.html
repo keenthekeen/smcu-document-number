@@ -1,6 +1,13 @@
 <div *ngIf="announcement$ | async as announcement" class="announcement yellow lighten-4">
   {{ announcement }}
 </div>
+<button type="button"
+        class="btn waves-effect waves-light full-width blue"
+        *ngIf="user && user.canEditStatus"
+        [disabled]="selectedDocs.length<1"
+        (click)="openBatchStatusModal()">
+  แก้ไขสถานะ ({{selectedDocs.length}} รายการ)
+</button>
 <div *ngIf="category$ | async as category">
   <div *ngIf="year$ | async as year">
     <span *ngIf="category.name; then hasName; else noName"></span>
@@ -13,6 +20,7 @@
     <table class="striped">
       <thead>
       <tr>
+        <th *ngIf="user && user.canEditStatus"></th>
         <th>ที่</th>
         <th>หัวเรื่อง</th>
         <th>หน่วยงาน</th>
@@ -23,6 +31,11 @@
       </thead>
       <tbody>
         <tr *ngFor="let document of documents$ | async as documents">
+          <td *ngIf="user && user.canEditStatus">
+            <label>
+              <input type="checkbox" (change)="onTick($event, document)" /><span></span>
+            </label>
+          </td>
           <span *ngIf="category.prefix; then hasPrefix; else noPrefix"></span>
           <ng-template #hasPrefix>
             <td>{{category.prefix}} {{document.number}}<sub>/{{year.buddhist_year}}</sub></td>
@@ -122,6 +135,62 @@
     <div class="modal-footer">
       <a class="modal-close waves-effect waves-red btn-flat">ยกเลิก</a>
       <a class="waves-effect waves-green btn-flat" (click)="saveStatus()">บันทึก <span *ngIf="uploadPercent">({{ uploadPercent | async }}%)</span></a>
+    </div>
+  </form>
+</div>
+<div #modalBatchStatus class="modal">
+  <form [formGroup]="batchStatusForm" *ngIf="user && user.canEditStatus">
+    <div class="modal-content">
+      <h4>แก้ไขสถานะหนังสือ ที่ <span *ngFor="let doc of selectedDocs">{{doc.number}} </span></h4>
+      <div>
+        <p>
+          <label>
+            <input name="status" type="radio" formControlName="status" value="ยังไม่ได้รับ"/>
+            <span>ยังไม่ได้รับ</span>
+          </label>
+        </p>
+        <p>
+          <label>
+            <input name="status" type="radio" formControlName="status" value="รอพิจารณา"/>
+            <span>รอพิจารณา</span>
+          </label>
+        </p>
+        <p>
+          <label>
+            <input name="status" type="radio" formControlName="status" value="อนุมัติแล้ว"/>
+            <span>อนุมัติแล้ว (ให้มารับคืน)</span>
+          </label>
+        </p>
+        <p>
+          <label>
+            <input name="status" type="radio" formControlName="status" value="รับทราบ"/>
+            <span>รับทราบ (ไม่ต้องคืน)</span>
+          </label>
+        </p>
+        <p>
+          <label>
+            <input name="status" type="radio" formControlName="status" value="กรุณาแก้ไข"/>
+            <span>กรุณาแก้ไขแล้วส่งใหม่</span>
+          </label>
+        </p>
+        <p>
+          <label>
+            <input name="status" type="radio" formControlName="status" value="ส่งต่อแล้ว"/>
+            <span>ส่งต่อไปยังหน่วยงานที่เกี่ยวข้องแล้ว</span>
+          </label>
+        </p>
+        <p>
+          <label>
+            <input name="status" type="radio" formControlName="status" value="คืนต้นเรื่องแล้ว"/>
+            <span>คืนต้นเรื่องแล้ว</span>
+          </label>
+        </p>
+        <p>[สำหรับฝ่ายกิจการนิสิต] เมื่อแก้ไขสถานะแล้ว ระบบจะแสดงผลบนเว็บไซต์ และส่งอีเมลแจ้งเตือนเจ้าของหนังสือ</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="modal-close waves-effect waves-red btn-flat">ยกเลิก</a>
+      <a class="waves-effect waves-green btn-flat" (click)="saveBatchStatus()">บันทึก</a>
     </div>
   </form>
 </div>
