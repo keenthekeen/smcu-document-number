@@ -32,7 +32,10 @@
           </ng-template>
           <td>{{document.name}}</td>
           <td>{{document.division.name}}</td>
-          <td>{{document.user ? document.user.profile.displayName : "-"}}</td>
+          <td>
+            {{document.user ? document.user.profile.displayName : "-"}}
+            <small *ngIf="document.user && user && user.canEditStatus">{{document.user.profile.email}}</small>
+          </td>
           <td>{{document.timestamp | date:"d MMMM y, HH:mm"}}</td>
           <td>
             {{document.status || "-"}}
