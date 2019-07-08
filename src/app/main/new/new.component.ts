@@ -6,7 +6,7 @@ import {AngularFireAuth} from '@angular/fire/auth';
 import {combineLatest, Observable} from 'rxjs';
 import {finalize, first, map, switchMap} from 'rxjs/operators';
 import * as Docxtemplater from 'docxtemplater';
-import * as JSZip from 'JSZip';
+import * as JSZip from 'jszip';
 import {saveAs} from 'file-saver';
 import {ThaiDatePipe} from '../../thai-date.pipe';
 import * as M from 'materialize-css';
