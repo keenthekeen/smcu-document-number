@@ -173,23 +173,32 @@ export class NewComponent implements OnInit, AfterViewChecked {
           finalize(async () => {
             // this.downloadURL = fileRef.getDownloadURL()
 
-            // Retrieve next available number
-            const nextNumberRef = this.afd.object<number>(`data/documents/${year.christian_year}/${category.value}/nextNumber`);
-            let nextNumber = await nextNumberRef.valueChanges().pipe(first()).toPromise();
-            if (!nextNumber) {
-              nextNumber = 1;
-            }
-
             // Update next available number setting
-            nextNumberRef.set(nextNumber + +numberOfDoc);
+            // nextNumberRef.set(nextNumber + +numberOfDoc);
+
+            const newNextNumber = await this.afd.database
+              .ref(
+                `data/documents/${year.christian_year}/${
+                  category.value
+                }/nextNumber`
+              )
+              .transaction(a => {
+                if (a) {
+                  return a + +numberOfDoc;
+                } else {
+                  return 1;
+                }
+              });
+
+            const currentNumber = newNextNumber - +numberOfDoc;
 
             // Get division info (plus sign: convert to number)
             const division = this.divisions.find(div => +div.value === +this.numberForm.value.divisionId);
 
             // Create new document
             this.afd.list(`data/documents/${year.christian_year}/${category.value}/documents`).push({
-              number: nextNumber,
-              name: (numberOfDoc > 1 ? `[${numberOfDoc} ฉบับ; ${nextNumber}-${nextNumber + +numberOfDoc - 1}] ` : '')
+              number: currentNumber,
+              name: (numberOfDoc > 1 ? `[${numberOfDoc} ฉบับ; ${currentNumber}-${currentNumber + +numberOfDoc - 1}] ` : '')
                 + this.numberForm.value.name,
               user: {profile: this.user},
               timestamp: firebase.database.ServerValue.TIMESTAMP,
