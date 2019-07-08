@@ -190,7 +190,7 @@ export class NewComponent implements OnInit, AfterViewChecked {
                 }
               });
 
-            const currentNumber = newNextNumber - +numberOfDoc;
+            const currentNumber = newNextNumber.snapshot.val() - +numberOfDoc;
 
             // Get division info (plus sign: convert to number)
             const division = this.divisions.find(div => +div.value === +this.numberForm.value.divisionId);
