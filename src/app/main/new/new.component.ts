@@ -181,7 +181,7 @@ export class NewComponent implements OnInit, AfterViewChecked {
             }
 
             // Update next available number setting
-            nextNumberRef.set(nextNumber - -numberOfDoc);
+            nextNumberRef.set(nextNumber + +numberOfDoc);
 
             // Get division info (plus sign: convert to number)
             const division = this.divisions.find(div => +div.value === +this.numberForm.value.divisionId);
@@ -189,7 +189,7 @@ export class NewComponent implements OnInit, AfterViewChecked {
             // Create new document
             this.afd.list(`data/documents/${year.christian_year}/${category.value}/documents`).push({
               number: nextNumber,
-              name: (numberOfDoc > 1 ? `[${numberOfDoc} ฉบับ; ${nextNumber}-${nextNumber - -numberOfDoc}] ` : '')
+              name: (numberOfDoc > 1 ? `[${numberOfDoc} ฉบับ; ${nextNumber}-${nextNumber + +numberOfDoc - 1}] ` : '')
                 + this.numberForm.value.name,
               user: {profile: this.user},
               timestamp: firebase.database.ServerValue.TIMESTAMP,
