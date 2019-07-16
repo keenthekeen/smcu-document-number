@@ -10,17 +10,9 @@ import { HomeComponent } from './home/home.component';
 import { ThaiDatePipe } from './thai-date.pipe';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    ThaiDatePipe
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    CoreModule,
-  ],
+  declarations: [AppComponent, HomeComponent, ThaiDatePipe],
+  imports: [BrowserModule, AppRoutingModule, CoreModule],
   providers: [UserGuard, NoUserGuard],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

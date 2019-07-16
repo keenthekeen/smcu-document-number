@@ -2,35 +2,41 @@
   <div *ngIf="year$ | async as year">
     <span *ngIf="category.name; then hasName; else noName"></span>
     <ng-template #hasName>
-      <h4>ออกหนังสือใหม่ ประเภท{{category.name}} ปี พ.ศ. {{year.buddhist_year}}</h4>
+      <h4>ออกหนังสือใหม่ ประเภท{{ category.name }} ปี พ.ศ. {{ year.buddhist_year }}</h4>
     </ng-template>
     <ng-template #noName>
-      <h4>ออกหนังสือใหม่ ปีพ.ศ. {{year.buddhist_year}}</h4>
+      <h4>ออกหนังสือใหม่ ปีพ.ศ. {{ year.buddhist_year }}</h4>
     </ng-template>
     <div class="row" *ngIf="divisions">
       <div class="col s12 m10 offset-m1">
-
         <ul class="collapsible">
           <li class="active">
-            <div class="collapsible-header"><i class="material-icons">add</i>ฉันร่างหนังสือไว้แล้ว ต้องการเพียงเลขที่หนังสือ</div>
+            <div class="collapsible-header">
+              <i class="material-icons">add</i>ฉันร่างหนังสือไว้แล้ว ต้องการเพียงเลขที่หนังสือ
+            </div>
             <div class="collapsible-body">
               <ul class="browser-default">
-                <li>ท่านจะต้องร่างหนังสือไว้เสร็จเรียบร้อยแล้ว เหลือเพียงเลขหนังสือเท่านั้น จึงจะดำเนินการต่อ เนื่องจากต้องส่งไฟล์เอกสารด้วย</li>
+                <li>
+                  ท่านจะต้องร่างหนังสือไว้เสร็จเรียบร้อยแล้ว เหลือเพียงเลขหนังสือเท่านั้น จึงจะดำเนินการต่อ
+                  เนื่องจากต้องส่งไฟล์เอกสารด้วย
+                </li>
                 <li>กรุณาส่งหนังสือทันทีหลังจากขอออกเลขที่หนังสือ ไม่เกิน 1 - 2 วันทำการ</li>
               </ul>
               <form [formGroup]="numberForm" (ngSubmit)="submitNumber()">
                 <div class="row">
                   <div class="input-field col s12">
-                    <input id="name" type="text" class="validate" formControlName="name" required>
+                    <input id="name" type="text" class="validate" formControlName="name" required />
                     <label for="name">หัวเรื่อง</label>
-                    <span class="helper-text">ในกรณีที่จะมีหนังสือหัวเรื่องเดียวกันหลายฉบับ ให้วงเล็บข้อมูลเพิ่มเติม เช่น ผู้รับ ไว้ด้วย</span>
+                    <span class="helper-text"
+                      >ในกรณีที่จะมีหนังสือหัวเรื่องเดียวกันหลายฉบับ ให้วงเล็บข้อมูลเพิ่มเติม เช่น ผู้รับ ไว้ด้วย</span
+                    >
                   </div>
                 </div>
                 <div class="row">
                   <div class="col s12">
                     <label>หน่วยงานที่ออกหนังสือ</label>
                     <select formControlName="divisionId">
-                      <option *ngFor="let division of divisions" [value]="division.value">{{division.name}}</option>
+                      <option *ngFor="let division of divisions" [value]="division.value">{{ division.name }}</option>
                     </select>
                   </div>
                 </div>
@@ -38,10 +44,14 @@
                   <div class="col s12 file-field input-field">
                     <div class="btn">
                       <span>File</span>
-                      <input type="file" (change)="onFileChange($event)" accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,image/jpeg,image/png">
+                      <input
+                        type="file"
+                        (change)="onFileChange($event)"
+                        accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,image/jpeg,image/png"
+                      />
                     </div>
                     <div class="file-path-wrapper">
-                      <input class="file-path validate" type="text" placeholder="อัพโหลดไฟล์เอกสาร (.docx/.pdf)">
+                      <input class="file-path validate" type="text" placeholder="อัพโหลดไฟล์เอกสาร (.docx/.pdf)" />
                     </div>
                   </div>
                 </div>
@@ -49,7 +59,7 @@
                   <div class="col s12">
                     <p>
                       <label>
-                        <input type="checkbox" formControlName="multipleDoc"/>
+                        <input type="checkbox" formControlName="multipleDoc" />
                         <span>ต้องการออกหนังสือในเรื่องเดียวกันนี้ไปยังผู้รับหลายคน (ออกหลายเลขที่)</span>
                       </label>
                     </p>
@@ -57,9 +67,11 @@
                 </div>
                 <div class="row" *ngIf="numberForm.value.multipleDoc">
                   <div class="input-field col s12">
-                    <input id="number" type="number" class="validate" formControlName="numberOfDoc">
+                    <input id="number" type="number" class="validate" formControlName="numberOfDoc" />
                     <label for="number">จำนวนหนังสือ</label>
-                    <span class="helper-text">โปรดขอเลขหนังสือให้พอดี หนังสือที่ออกเลขพร้อมกันต้องส่งพร้อมกันในวันที่เดียวกัน</span>
+                    <span class="helper-text"
+                      >โปรดขอเลขหนังสือให้พอดี หนังสือที่ออกเลขพร้อมกันต้องส่งพร้อมกันในวันที่เดียวกัน</span
+                    >
                   </div>
                 </div>
                 <div class="row">
@@ -74,9 +86,15 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header"><i class="material-icons">create</i>ฉันต้องการร่างหนังสือใหม่ โดยใช้แบบมาตรฐาน (beta)</div>
+            <div class="collapsible-header">
+              <i class="material-icons">create</i>ฉันต้องการร่างหนังสือใหม่ โดยใช้แบบมาตรฐาน (beta)
+            </div>
             <div class="collapsible-body">
-              <span>ในขณะนี้ ระบบสามารถสร้างหนังสือที่ใช้รูปแบบมาตรฐาน (3 ย่อหน้า) เท่านั้น และยังไม่สามารถออกเลขหนังสือสพจ. พร้อมกันได้ เมื่อสร้างไฟล์เอกสารขึ้นมาแล้ว ให้ปรับแก้ไขตามความเหมาะสม แล้วจึงขอเลขที่หนังสือผ่านเว็บไซต์นี้อีกครั้ง</span>
+              <span
+                >ในขณะนี้ ระบบสามารถสร้างหนังสือที่ใช้รูปแบบมาตรฐาน (3 ย่อหน้า) เท่านั้น
+                และยังไม่สามารถออกเลขหนังสือสพจ. พร้อมกันได้ เมื่อสร้างไฟล์เอกสารขึ้นมาแล้ว ให้ปรับแก้ไขตามความเหมาะสม
+                แล้วจึงขอเลขที่หนังสือผ่านเว็บไซต์นี้อีกครั้ง</span
+              >
               <form [formGroup]="docForm" (ngSubmit)="submitDoc()">
                 <!--div class="row">
                   <div class="col s12">
@@ -88,14 +106,14 @@
                 </div-->
                 <div class="row">
                   <div class="input-field col s12">
-                    <input id="gName" type="text" class="validate" formControlName="name" required>
+                    <input id="gName" type="text" class="validate" formControlName="name" required />
                     <label for="gName">หัวเรื่อง</label>
                     <span class="helper-text">เรื่องย่อที่เป็นใจความที่สั้นที่สุดของหนังสือฉบับนี้</span>
                   </div>
                 </div>
                 <div class="row">
                   <div class="input-field col s12">
-                    <input id="gTo" type="text" class="validate autocomplete" formControlName="to" required>
+                    <input id="gTo" type="text" class="validate autocomplete" formControlName="to" required />
                     <label for="gTo">ถึง</label>
                     <span class="helper-text">โดยปกติคือตำแหน่งของหัวหน้าหน่วยงานที่ต้องการแจ้ง</span>
                   </div>
@@ -104,7 +122,7 @@
                   <div class="col s12">
                     <p>
                       <label>
-                        <input type="checkbox" formControlName="insideTo"/>
+                        <input type="checkbox" formControlName="insideTo" />
                         <span>ผู้รับเป็นอาจารย์ในจุฬาลงกรณ์มหาวิทยาลัย (ลงท้าย "ด้วยความเคารพอย่างสูง")</span>
                       </label>
                     </p>
@@ -131,7 +149,7 @@
                 </div>
                 <div class="row">
                   <div class="input-field col s12">
-                    <input id="gParagraph3" type="text" class="validate autocomplete" formControlName="paragraph_3"/>
+                    <input id="gParagraph3" type="text" class="validate autocomplete" formControlName="paragraph_3" />
                     <label for="gParagraph3">ย่อหน้า 3: สรุปความประสงค์ (จึงเรียนมาเพื่อ...)</label>
                   </div>
                 </div>
@@ -139,7 +157,12 @@
                   <div class="col s12 input-field">
                     <select formControlName="signer_1" required>
                       <option value="skip">(ข้าม)</option>
-                      <option *ngFor="let person of signers[1]" [value]="person.name+'/'+person.title" [attr.data-icon]="person.picture_url">{{person.title}}</option>
+                      <option
+                        *ngFor="let person of signers[1]"
+                        [value]="person.name + '/' + person.title"
+                        [attr.data-icon]="person.picture_url"
+                        >{{ person.title }}</option
+                      >
                     </select>
                     <label>ผู้ลงนาม 1</label>
                   </div>
@@ -148,7 +171,12 @@
                   <div class="col s12 input-field">
                     <select formControlName="signer_2" required>
                       <option value="skip">(ข้าม)</option>
-                      <option *ngFor="let person of signers[2]" [value]="person.name+'/'+person.title" [attr.data-icon]="person.picture_url">{{person.title}}</option>
+                      <option
+                        *ngFor="let person of signers[2]"
+                        [value]="person.name + '/' + person.title"
+                        [attr.data-icon]="person.picture_url"
+                        >{{ person.title }}</option
+                      >
                     </select>
                     <label>ผู้ลงนาม 2</label>
                   </div>
@@ -156,7 +184,12 @@
                 <div class="row">
                   <div class="col s12 input-field">
                     <select formControlName="signer_3" required>
-                      <option *ngFor="let person of signers[3]" [value]="person.name+'/'+person.title" [attr.data-icon]="person.picture_url">{{person.title}}</option>
+                      <option
+                        *ngFor="let person of signers[3]"
+                        [value]="person.name + '/' + person.title"
+                        [attr.data-icon]="person.picture_url"
+                        >{{ person.title }}</option
+                      >
                       <option value="skip">(ข้าม)</option>
                     </select>
                     <label>ผู้ลงนาม 3</label>
@@ -166,12 +199,12 @@
                   <h6>นิสิตผู้ประสานงาน</h6>
                   <div class="row">
                     <div class="col s6 input-field">
-                      <input id="gContactName" type="text" class="validate" formControlName="contact_name" required>
+                      <input id="gContactName" type="text" class="validate" formControlName="contact_name" required />
                       <label for="gContactName">ชื่อ</label>
                       <span class="helper-text">ผู้ที่ต้องการให้ติดต่อกลับ (นาย/นางสาว)</span>
                     </div>
                     <div class="col s6 input-field">
-                      <input id="gContactPhone" type="text" class="validate" formControlName="contact_phone" required>
+                      <input id="gContactPhone" type="text" class="validate" formControlName="contact_phone" required />
                       <label for="gContactPhone">หมายเลขโทรศัพท์</label>
                       <span class="helper-text">ในรูปแบบ 08-1234-5678</span>
                     </div>
@@ -181,7 +214,7 @@
                   <div class="col s12">
                     <p>
                       <label>
-                        <input type="checkbox" formControlName="hasAssocSign"/>
+                        <input type="checkbox" formControlName="hasAssocSign" />
                         <span>ให้รองคณบดีฝ่ายกิจการนิสิตลงนามรับรอง</span>
                       </label>
                     </p>
@@ -195,7 +228,11 @@
                 </div>
                 <div class="row">
                   <div class="col s12">
-                    <button class="btn waves-effect waves-light blue" type="submit" [disabled]="docForm.disabled || docForm.invalid">
+                    <button
+                      class="btn waves-effect waves-light blue"
+                      type="submit"
+                      [disabled]="docForm.disabled || docForm.invalid"
+                    >
                       สร้างไฟล์หนังสือ
                       <i class="material-icons right">save</i>
                     </button>
@@ -205,7 +242,6 @@
             </div>
           </li>
         </ul>
-
       </div>
     </div>
   </div>

@@ -22,7 +22,7 @@ const routes: Routes = [
       },
       {
         path: ':year/:category/new',
-        loadChildren: () => import('./new/new-component.module').then(mod => mod.NewComponentModule),
+        loadChildren: () => import('./new/new-component.module').then(mod => mod.NewComponentModule)
       }
     ]
   }
@@ -32,4 +32,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class MainRoutingModule { }
+export class MainRoutingModule {}

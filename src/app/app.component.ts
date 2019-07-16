@@ -1,8 +1,8 @@
 import { AuthService } from './core/auth.service';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import * as firebase from 'firebase/app';
-import {AngularFireAuth} from '@angular/fire/auth';
-import {Observable} from 'rxjs';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { Observable } from 'rxjs';
 import * as M from 'materialize-css';
 
 @Component({
@@ -13,10 +13,7 @@ import * as M from 'materialize-css';
 export class AppComponent implements OnInit, AfterViewInit {
   user$: Observable<firebase.User>;
 
-  constructor(
-    private afa: AngularFireAuth,
-    private auth: AuthService
-  ) { }
+  constructor(private afa: AngularFireAuth, private auth: AuthService) {}
 
   ngOnInit() {
     this.user$ = this.afa.authState;

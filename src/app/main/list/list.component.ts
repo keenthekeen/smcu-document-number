@@ -15,10 +15,9 @@ import { UserProfile } from '../../user-profile';
   styleUrls: ['./list.component.scss']
 })
 export class ListComponent implements OnInit, AfterViewInit {
-
-  @ViewChild('floatBtn', {static: false}) floatBtn: ElementRef;
-  @ViewChild('modalStatus', {static: false}) modalStatus: ElementRef;
-  @ViewChild('modalBatchStatus', {static: false}) modalBatchStatus: ElementRef;
+  @ViewChild('floatBtn', { static: false }) floatBtn: ElementRef;
+  @ViewChild('modalStatus', { static: false }) modalStatus: ElementRef;
+  @ViewChild('modalBatchStatus', { static: false }) modalBatchStatus: ElementRef;
 
   params$: Observable<[string, string]>;
   documents$: Observable<any[]>;
@@ -41,7 +40,8 @@ export class ListComponent implements OnInit, AfterViewInit {
     private afd: AngularFireDatabase,
     private storage: AngularFireStorage,
     private afa: AngularFireAuth,
-    formBuilder: FormBuilder) {
+    formBuilder: FormBuilder
+  ) {
     this.statusForm = formBuilder.group({
       status: ['']
     });
@@ -80,42 +80,67 @@ export class ListComponent implements OnInit, AfterViewInit {
         }
       }),
       switchMap(([year, category]) => {
-        return of([year, category]).pipe(concat(
-          this.afd.object(`data/years/${year}`).valueChanges().pipe(tap(yearData => {
-            if (!yearData) {
-              const yearNum = parseInt(year, 10);
-              this.afd.database.ref(`data/years/${year}`).set({
-                christian_year: yearNum,
-                buddhist_year: yearNum + 543
-              });
-            }
-          })).pipe(ignoreElements())
-        )) as Observable<[string, string]>;
+        return of([year, category]).pipe(
+          concat(
+            this.afd
+              .object(`data/years/${year}`)
+              .valueChanges()
+              .pipe(
+                tap(yearData => {
+                  if (!yearData) {
+                    const yearNum = parseInt(year, 10);
+                    this.afd.database.ref(`data/years/${year}`).set({
+                      christian_year: yearNum,
+                      buddhist_year: yearNum + 543
+                    });
+                  }
+                })
+              )
+              .pipe(ignoreElements())
+          )
+        ) as Observable<[string, string]>;
       })
     );
-    this.documents$ = this.params$.pipe(switchMap((params) => {
-      // Get documents, along with its unique key and year, limited to 1 update per 2 seconds
-      // sorted by timestamp in descending order
-      return this.afd.list(`data/documents/${params[0]}/${params[1]}/documents`, ref => ref.orderByChild('number'))
-        .snapshotChanges()
-        .pipe(throttle(val => interval(2000)), map((list: SnapshotAction<any>[]) => { // TODO: why throttle?
-          return list.map(doc => {
-            return {$key: doc.key, ...doc.payload.val(), $year: params[0], $category: params[1]};
-          }).sort((a, b) => b.number - a.number);
-        }));
-    }));
-    this.year$ = this.params$.pipe(switchMap((params) => {
-      return this.afd.object(`data/years/${params[0]}`).valueChanges();
-    }));
-    this.category$ = this.params$.pipe(switchMap((params) => {
-      return this.afd.object(`data/categories/${params[1]}`).valueChanges();
-    }));
+    this.documents$ = this.params$.pipe(
+      switchMap(params => {
+        // Get documents, along with its unique key and year, limited to 1 update per 2 seconds
+        // sorted by timestamp in descending order
+        return this.afd
+          .list(`data/documents/${params[0]}/${params[1]}/documents`, ref => ref.orderByChild('number'))
+          .snapshotChanges()
+          .pipe(
+            throttle(val => interval(2000)),
+            map((list: SnapshotAction<any>[]) => {
+              // TODO: why throttle?
+              return list
+                .map(doc => {
+                  return { $key: doc.key, ...doc.payload.val(), $year: params[0], $category: params[1] };
+                })
+                .sort((a, b) => b.number - a.number);
+            })
+          );
+      })
+    );
+    this.year$ = this.params$.pipe(
+      switchMap(params => {
+        return this.afd.object(`data/years/${params[0]}`).valueChanges();
+      })
+    );
+    this.category$ = this.params$.pipe(
+      switchMap(params => {
+        return this.afd.object(`data/categories/${params[1]}`).valueChanges();
+      })
+    );
     this.announcement$ = this.afd.object<string>('data/announcement').valueChanges();
-    this.afa.authState.pipe(first()).subscribe((authState) => {
+    this.afa.authState.pipe(first()).subscribe(authState => {
       if (authState) {
-        this.afd.object<UserProfile>(`data/users/${authState.uid}/profile`).valueChanges().pipe(first()).subscribe((data) => {
-          this.user = data;
-        });
+        this.afd
+          .object<UserProfile>(`data/users/${authState.uid}/profile`)
+          .valueChanges()
+          .pipe(first())
+          .subscribe(data => {
+            this.user = data;
+          });
       }
     });
   }
@@ -127,9 +152,13 @@ export class ListComponent implements OnInit, AfterViewInit {
   }
 
   downloadAttachment(path) {
-    this.storage.ref(path).getDownloadURL().pipe(first()).subscribe(url => {
-      window.location.href = url;
-    });
+    this.storage
+      .ref(path)
+      .getDownloadURL()
+      .pipe(first())
+      .subscribe(url => {
+        window.location.href = url;
+      });
   }
 
   openStatusModal(doc) {
@@ -148,33 +177,46 @@ export class ListComponent implements OnInit, AfterViewInit {
           .ref(`data/documents/${this.focusedDoc.$year}/${this.focusedDoc.$category}/documents/${this.focusedDoc.$key}`)
           .update({
             status: this.statusForm.value.status
-          }).then(() => {
-            M.toast({html: 'แก้ไขสถานะหนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'});
+          })
+          .then(() => {
+            M.toast({ html: 'แก้ไขสถานะหนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว' });
           });
       }
       if (this.selectedFile) {
         // Upload file
-        const filePath = this.focusedDoc.filePath
-          || ('document/' + this.focusedDoc.$year + '/' + Date.now() + '-' + Math.round(Math.random() * 100));
+        const filePath =
+          this.focusedDoc.filePath ||
+          'document/' + this.focusedDoc.$year + '/' + Date.now() + '-' + Math.round(Math.random() * 100);
         const task = this.storage.upload(filePath, this.selectedFile);
 
         // observe percentage changes
         this.uploadPercent = task.percentageChanges();
         // get notified when the download URL is available
-        task.snapshotChanges().pipe(
-          finalize(() => {
-            if (!this.focusedDoc.filePath) {
-              this.afd.database
-                .ref(`data/documents/${this.focusedDoc.$year}/${this.focusedDoc.$category}/documents/${this.focusedDoc.$key}`)
-                .update({
-                  filePath: filePath
-                }).then(() => {
-                  M.toast({html: 'อัพโหลดหนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'});
+        task
+          .snapshotChanges()
+          .pipe(
+            finalize(() => {
+              if (!this.focusedDoc.filePath) {
+                this.afd.database
+                  .ref(
+                    `data/documents/${this.focusedDoc.$year}/${this.focusedDoc.$category}/documents/${this.focusedDoc.$key}`
+                  )
+                  .update({
+                    filePath: filePath
+                  })
+                  .then(() => {
+                    M.toast({
+                      html: 'อัพโหลดหนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'
+                    });
+                  });
+              } else {
+                M.toast({
+                  html: 'แก้ไขไฟล์หนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'
                 });
-            } else {
-              M.toast({html: 'แก้ไขไฟล์หนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'});
-            }
-          })).subscribe();
+              }
+            })
+          )
+          .subscribe();
       }
 
       this.modalStatusControl.close();
@@ -201,8 +243,9 @@ export class ListComponent implements OnInit, AfterViewInit {
           .ref(`data/documents/${selectedDoc.$year}/${selectedDoc.$category}/documents/${selectedDoc.$key}`)
           .update({
             status: this.batchStatusForm.value.status
-          }).then(() => {
-            M.toast({html: 'แก้ไขสถานะหนังสือที่ ' + selectedDoc.number + '/' + selectedDoc.$year + ' แล้ว'});
+          })
+          .then(() => {
+            M.toast({ html: 'แก้ไขสถานะหนังสือที่ ' + selectedDoc.number + '/' + selectedDoc.$year + ' แล้ว' });
           });
       }
       this.modalBatchStatusControl.close();

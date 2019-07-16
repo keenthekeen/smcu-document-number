@@ -1,61 +1,68 @@
 <div *ngIf="announcement$ | async as announcement" class="announcement yellow lighten-4">
   {{ announcement }}
 </div>
-<button type="button"
-        class="btn waves-effect waves-light full-width blue"
-        *ngIf="user && user.canEditStatus"
-        [disabled]="selectedDocs.length<1"
-        (click)="openBatchStatusModal()">
-  แก้ไขสถานะ ({{selectedDocs.length}} รายการ)
+<button
+  type="button"
+  class="btn waves-effect waves-light full-width blue"
+  *ngIf="user && user.canEditStatus"
+  [disabled]="selectedDocs.length < 1"
+  (click)="openBatchStatusModal()"
+>
+  แก้ไขสถานะ ({{ selectedDocs.length }} รายการ)
 </button>
 <div *ngIf="category$ | async as category">
   <div *ngIf="year$ | async as year">
     <span *ngIf="category.name; then hasName; else noName"></span>
     <ng-template #hasName>
-      <h4>หนังสือประเภท{{category.name}} ปี พ.ศ. {{year.buddhist_year}}</h4>
+      <h4>หนังสือประเภท{{ category.name }} ปี พ.ศ. {{ year.buddhist_year }}</h4>
     </ng-template>
     <ng-template #noName>
-      <h4>หนังสือออก ปีพ.ศ. {{year.buddhist_year}}</h4>
+      <h4>หนังสือออก ปีพ.ศ. {{ year.buddhist_year }}</h4>
     </ng-template>
     <table class="striped">
       <thead>
-      <tr>
-        <th *ngIf="user && user.canEditStatus"></th>
-        <th>ที่</th>
-        <th>หัวเรื่อง</th>
-        <th>หน่วยงาน</th>
-        <th>ผู้ขอ</th>
-        <th>เวลา</th>
-        <th>สถานะ</th>
-      </tr>
+        <tr>
+          <th *ngIf="user && user.canEditStatus"></th>
+          <th>ที่</th>
+          <th>หัวเรื่อง</th>
+          <th>หน่วยงาน</th>
+          <th>ผู้ขอ</th>
+          <th>เวลา</th>
+          <th>สถานะ</th>
+        </tr>
       </thead>
       <tbody>
         <tr *ngFor="let document of documents$ | async as documents">
           <td *ngIf="user && user.canEditStatus">
-            <label>
-              <input type="checkbox" (change)="onTick($event, document)" /><span></span>
-            </label>
+            <label> <input type="checkbox" (change)="onTick($event, document)" /><span></span> </label>
           </td>
           <span *ngIf="category.prefix; then hasPrefix; else noPrefix"></span>
           <ng-template #hasPrefix>
-            <td>{{category.prefix}} {{document.number}}<sub>/{{year.buddhist_year}}</sub></td>
+            <td>
+              {{ category.prefix }} {{ document.number }}<sub>/{{ year.buddhist_year }}</sub>
+            </td>
           </ng-template>
           <ng-template #noPrefix>
-            <td>{{document.number}}<sub>/{{year.buddhist_year}}</sub></td>
+            <td>
+              {{ document.number }}<sub>/{{ year.buddhist_year }}</sub>
+            </td>
           </ng-template>
-          <td>{{document.name}}</td>
-          <td>{{document.division.name}}</td>
+          <td>{{ document.name }}</td>
+          <td>{{ document.division.name }}</td>
           <td>
-            {{document.user ? document.user.profile.displayName : "-"}}
-            <small *ngIf="document.user && user && user.canEditStatus">{{document.user.profile.email}}</small>
+            {{ document.user ? document.user.profile.displayName : '-' }}
+            <small *ngIf="document.user && user && user.canEditStatus">{{ document.user.profile.email }}</small>
           </td>
-          <td>{{document.timestamp | date:"d MMMM y, HH:mm"}}</td>
+          <td>{{ document.timestamp | date: 'd MMMM y, HH:mm' }}</td>
           <td>
-            {{document.status || "-"}}
+            {{ document.status || '-' }}
             <a *ngIf="document.filePath" (click)="downloadAttachment(document.filePath)">
               <i class="material-icons">save_alt</i>
             </a>
-            <a *ngIf="user && (user.canEditStatus || user.uid === document.user.profile.uid)" (click)="openStatusModal(document)">
+            <a
+              *ngIf="user && (user.canEditStatus || user.uid === document.user.profile.uid)"
+              (click)="openStatusModal(document)"
+            >
               <i class="material-icons">settings</i>
             </a>
           </td>
@@ -68,48 +75,48 @@
 <div #modalStatus class="modal">
   <form [formGroup]="statusForm">
     <div class="modal-content">
-      <h4 *ngIf="focusedDoc">แก้ไขข้อมูลหนังสือ ที่ {{focusedDoc.number}}/{{focusedDoc.$year--543}}</h4>
+      <h4 *ngIf="focusedDoc">แก้ไขข้อมูลหนังสือ ที่ {{ focusedDoc.number }}/{{ focusedDoc.$year - -543 }}</h4>
       <div *ngIf="user && user.canEditStatus">
         <h5>สถานะ</h5>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="ยังไม่ได้รับ"/>
+            <input name="status" type="radio" formControlName="status" value="ยังไม่ได้รับ" />
             <span>ยังไม่ได้รับ</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="รอพิจารณา"/>
+            <input name="status" type="radio" formControlName="status" value="รอพิจารณา" />
             <span>รอพิจารณา</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="อนุมัติแล้ว"/>
+            <input name="status" type="radio" formControlName="status" value="อนุมัติแล้ว" />
             <span>อนุมัติแล้ว (ให้มารับคืน)</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="รับทราบ"/>
+            <input name="status" type="radio" formControlName="status" value="รับทราบ" />
             <span>รับทราบ (ไม่ต้องคืน)</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="กรุณาแก้ไข"/>
+            <input name="status" type="radio" formControlName="status" value="กรุณาแก้ไข" />
             <span>กรุณาแก้ไขแล้วส่งใหม่</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="ส่งต่อแล้ว"/>
+            <input name="status" type="radio" formControlName="status" value="ส่งต่อแล้ว" />
             <span>ส่งต่อไปยังหน่วยงานที่เกี่ยวข้องแล้ว</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="คืนต้นเรื่องแล้ว"/>
+            <input name="status" type="radio" formControlName="status" value="คืนต้นเรื่องแล้ว" />
             <span>คืนต้นเรื่องแล้ว</span>
           </label>
         </p>
@@ -122,11 +129,14 @@
           <div class="col s12 file-field input-field">
             <div class="btn">
               <span>File</span>
-              <input type="file" (change)="onFileChange($event)"
-                     accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,image/jpeg,image/png">
+              <input
+                type="file"
+                (change)="onFileChange($event)"
+                accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,image/jpeg,image/png"
+              />
             </div>
             <div class="file-path-wrapper">
-              <input class="file-path validate" type="text" placeholder="อัพโหลดไฟล์เอกสาร (.docx/.pdf)">
+              <input class="file-path validate" type="text" placeholder="อัพโหลดไฟล์เอกสาร (.docx/.pdf)" />
             </div>
           </div>
         </div>
@@ -134,54 +144,58 @@
     </div>
     <div class="modal-footer">
       <a class="modal-close waves-effect waves-red btn-flat">ยกเลิก</a>
-      <a class="waves-effect waves-green btn-flat" (click)="saveStatus()">บันทึก <span *ngIf="uploadPercent">({{ uploadPercent | async }}%)</span></a>
+      <a class="waves-effect waves-green btn-flat" (click)="saveStatus()"
+        >บันทึก <span *ngIf="uploadPercent">({{ uploadPercent | async }}%)</span></a
+      >
     </div>
   </form>
 </div>
 <div #modalBatchStatus class="modal">
   <form [formGroup]="batchStatusForm" *ngIf="user && user.canEditStatus">
     <div class="modal-content">
-      <h4>แก้ไขสถานะหนังสือ ที่ <span *ngFor="let doc of selectedDocs">{{doc.number}} </span></h4>
+      <h4>
+        แก้ไขสถานะหนังสือ ที่ <span *ngFor="let doc of selectedDocs">{{ doc.number }} </span>
+      </h4>
       <div>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="ยังไม่ได้รับ"/>
+            <input name="status" type="radio" formControlName="status" value="ยังไม่ได้รับ" />
             <span>ยังไม่ได้รับ</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="รอพิจารณา"/>
+            <input name="status" type="radio" formControlName="status" value="รอพิจารณา" />
             <span>รอพิจารณา</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="อนุมัติแล้ว"/>
+            <input name="status" type="radio" formControlName="status" value="อนุมัติแล้ว" />
             <span>อนุมัติแล้ว (ให้มารับคืน)</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="รับทราบ"/>
+            <input name="status" type="radio" formControlName="status" value="รับทราบ" />
             <span>รับทราบ (ไม่ต้องคืน)</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="กรุณาแก้ไข"/>
+            <input name="status" type="radio" formControlName="status" value="กรุณาแก้ไข" />
             <span>กรุณาแก้ไขแล้วส่งใหม่</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="ส่งต่อแล้ว"/>
+            <input name="status" type="radio" formControlName="status" value="ส่งต่อแล้ว" />
             <span>ส่งต่อไปยังหน่วยงานที่เกี่ยวข้องแล้ว</span>
           </label>
         </p>
         <p>
           <label>
-            <input name="status" type="radio" formControlName="status" value="คืนต้นเรื่องแล้ว"/>
+            <input name="status" type="radio" formControlName="status" value="คืนต้นเรื่องแล้ว" />
             <span>คืนต้นเรื่องแล้ว</span>
           </label>
         </p>
