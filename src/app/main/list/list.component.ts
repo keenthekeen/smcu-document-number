@@ -1,13 +1,13 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AngularFireDatabase, SnapshotAction} from '@angular/fire/database';
-import {interval, Observable, ReplaySubject} from 'rxjs';
-import {finalize, first, map, switchMap, throttle} from 'rxjs/operators';
-import {AngularFireStorage} from '@angular/fire/storage';
-import {AngularFireAuth} from '@angular/fire/auth';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFireDatabase, SnapshotAction } from '@angular/fire/database';
+import { AngularFireStorage } from '@angular/fire/storage';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as M from 'materialize-css';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {UserProfile} from '../../user-profile';
+import { EMPTY, interval, Observable, of } from 'rxjs';
+import { finalize, first, map, switchMap, throttle } from 'rxjs/operators';
+import { UserProfile } from '../../user-profile';
 
 @Component({
   selector: 'smcu-list',
@@ -20,7 +20,7 @@ export class ListComponent implements OnInit, AfterViewInit {
   @ViewChild('modalStatus', {static: false}) modalStatus: ElementRef;
   @ViewChild('modalBatchStatus', {static: false}) modalBatchStatus: ElementRef;
 
-  params$: ReplaySubject<[string, string]>;
+  params$: Observable<[string, string]>;
   documents$: Observable<any[]>;
   year$: Observable<any>;
   category$: Observable<any>;
@@ -51,24 +51,35 @@ export class ListComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    this.params$ = new ReplaySubject<[string, string]>();
-    this.route.params.subscribe((params) => {
-      if (params.year) {
-        if (params.category) {
-          this.params$.next([params.year, params.category]);
+    this.params$ = this.route.paramMap.pipe(
+      map(s => {
+        return [s.get('year'), s.get('category')];
+      }),
+      switchMap(([year, category]) => {
+        if (year && category) {
+          return of([year, category] as [string, string]);
         } else {
-          this.afd.object('/config/allowNormal').valueChanges().pipe(first()).subscribe((allowNormal) => {
-            if (allowNormal) {
-              this.router.navigate(['normal'], {relativeTo: this.route});
-            } else {
-              this.router.navigate(['special'], {relativeTo: this.route});
-            }
-          });
+          if (!year) {
+            this.router.navigate([new Date().getFullYear()], { relativeTo: this.route });
+            return EMPTY;
+          } else {
+            return this.afd
+              .object('/config/allowNormal')
+              .valueChanges()
+              .pipe(
+                switchMap(allowNormal => {
+                  if (allowNormal) {
+                    this.router.navigate(['normal'], { relativeTo: this.route });
+                  } else {
+                    this.router.navigate(['special'], { relativeTo: this.route });
+                  }
+                  return EMPTY;
+                })
+              );
+          }
         }
-      } else {
-        this.router.navigate([(new Date()).getFullYear()], {relativeTo: this.route});
-      }
-    });
+      })
+    );
     this.params$.pipe(map((params) => params[0])).subscribe((year) => {
       this.afd.object(`data/years/${year}`).valueChanges().pipe(first()).subscribe((yearData) => {
         if (!yearData) {
@@ -136,8 +147,8 @@ export class ListComponent implements OnInit, AfterViewInit {
           .update({
             status: this.statusForm.value.status
           }).then(() => {
-          M.toast({html: 'แก้ไขสถานะหนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'});
-        });
+            M.toast({html: 'แก้ไขสถานะหนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'});
+          });
       }
       if (this.selectedFile) {
         // Upload file
@@ -156,8 +167,8 @@ export class ListComponent implements OnInit, AfterViewInit {
                 .update({
                   filePath: filePath
                 }).then(() => {
-                M.toast({html: 'อัพโหลดหนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'});
-              });
+                  M.toast({html: 'อัพโหลดหนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'});
+                });
             } else {
               M.toast({html: 'แก้ไขไฟล์หนังสือที่ ' + this.focusedDoc.number + '/' + this.focusedDoc.$year + ' แล้ว'});
             }
@@ -189,8 +200,8 @@ export class ListComponent implements OnInit, AfterViewInit {
           .update({
             status: this.batchStatusForm.value.status
           }).then(() => {
-          M.toast({html: 'แก้ไขสถานะหนังสือที่ ' + selectedDoc.number + '/' + selectedDoc.$year + ' แล้ว'});
-        });
+            M.toast({html: 'แก้ไขสถานะหนังสือที่ ' + selectedDoc.number + '/' + selectedDoc.$year + ' แล้ว'});
+          });
       }
       this.modalBatchStatusControl.close();
     }
