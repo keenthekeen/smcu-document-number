@@ -6,7 +6,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router';
 import * as M from 'materialize-css';
 import { EMPTY, interval, Observable, of } from 'rxjs';
-import { finalize, first, map, switchMap, throttle } from 'rxjs/operators';
+import { finalize, first, map, switchMap, throttle, tap, concat, ignoreElements, filter } from 'rxjs/operators';
 import { UserProfile } from '../../user-profile';
 
 @Component({
@@ -78,19 +78,21 @@ export class ListComponent implements OnInit, AfterViewInit {
               );
           }
         }
+      }),
+      switchMap(([year, category]) => {
+        return of([year, category]).pipe(concat(
+          this.afd.object(`data/years/${year}`).valueChanges().pipe(tap(yearData => {
+            if (!yearData) {
+              const yearNum = parseInt(year, 10);
+              this.afd.database.ref(`data/years/${year}`).set({
+                christian_year: yearNum,
+                buddhist_year: yearNum + 543
+              });
+            }
+          })).pipe(ignoreElements())
+        )) as Observable<[string, string]>;
       })
     );
-    this.params$.pipe(map((params) => params[0])).subscribe((year) => {
-      this.afd.object(`data/years/${year}`).valueChanges().pipe(first()).subscribe((yearData) => {
-        if (!yearData) {
-          const yearNum = parseInt(year, 10);
-          this.afd.database.ref(`data/years/${year}`).set({
-            christian_year: yearNum,
-            buddhist_year: yearNum + 543
-          });
-        }
-      });
-    });
     this.documents$ = this.params$.pipe(switchMap((params) => {
       // Get documents, along with its unique key and year, limited to 1 update per 2 seconds
       // sorted by timestamp in descending order
