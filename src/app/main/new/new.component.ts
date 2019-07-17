@@ -145,6 +145,7 @@ export class NewComponent implements OnInit, AfterViewChecked {
         M.Autocomplete.init(document.getElementById('gTo'), {
           data: {
             รองคณบดีฝ่ายกิจการนิสิต:
+              // tslint:disable-next-line: max-line-length
               'https://firebasestorage.googleapis.com/v0/b/smcu-document-number.appspot.com/o/board-face%2Fpongsak.jpg?alt=media&token=20b6b894-989e-42d0-98d7-d4585bc7ddd2',
             รองคณบดีฝ่ายบริหาร: null,
             'รองผู้อำนวยการโรงพยาบาลจุฬาลงกรณ์ ฝ่ายกายภาพ': null
