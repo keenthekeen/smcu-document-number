@@ -4,7 +4,7 @@
 <button
   type="button"
   class="btn waves-effect waves-light full-width blue"
-  *ngIf="user && user.canEditStatus"
+  *ngIf="(user$ | async) && (user$ | async).canEditStatus"
   [disabled]="selectedDocs.length < 1"
   (click)="openBatchStatusModal()"
 >
@@ -22,7 +22,7 @@
     <table class="striped">
       <thead>
         <tr>
-          <th *ngIf="user && user.canEditStatus"></th>
+          <th *ngIf="(user$ | async) && (user$ | async).canEditStatus"></th>
           <th>ที่</th>
           <th>หัวเรื่อง</th>
           <th>หน่วยงาน</th>
@@ -33,7 +33,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let document of documents$ | async as documents">
-          <td *ngIf="user && user.canEditStatus">
+          <td *ngIf="(user$ | async) && (user$ | async).canEditStatus">
             <label> <input type="checkbox" (change)="onTick($event, document)" /><span></span> </label>
           </td>
           <span *ngIf="category.prefix; then hasPrefix; else noPrefix"></span>
@@ -51,7 +51,7 @@
           <td>{{ document.division.name }}</td>
           <td>
             {{ document.user ? document.user.profile.displayName : '-' }}
-            <small *ngIf="document.user && user && user.canEditStatus">{{ document.user.profile.email }}</small>
+            <small *ngIf="document.user && (user$ | async) && (user$ | async).canEditStatus">{{ document.user.profile.email }}</small>
           </td>
           <td>{{ document.timestamp | date: 'd MMMM y, HH:mm' }}</td>
           <td>
@@ -60,7 +60,7 @@
               <i class="material-icons">save_alt</i>
             </a>
             <a
-              *ngIf="user && (user.canEditStatus || user.uid === document.user.profile.uid)"
+              *ngIf="(user$ | async) && ((user$ | async).canEditStatus || (user$ | async).uid === document.user.profile.uid)"
               (click)="openStatusModal(document)"
             >
               <i class="material-icons">settings</i>
@@ -76,7 +76,7 @@
   <form [formGroup]="statusForm">
     <div class="modal-content">
       <h4 *ngIf="focusedDoc">แก้ไขข้อมูลหนังสือ ที่ {{ focusedDoc.number }}/{{ focusedDoc.$year - -543 }}</h4>
-      <div *ngIf="user && user.canEditStatus">
+      <div *ngIf="(user$ | async) && (user$ | async).canEditStatus">
         <h5>สถานะ</h5>
         <p>
           <label>
@@ -123,7 +123,7 @@
         <p>[สำหรับฝ่ายกิจการนิสิต] เมื่อแก้ไขสถานะแล้ว ระบบจะแสดงผลบนเว็บไซต์ และส่งอีเมลแจ้งเตือนเจ้าของหนังสือ</p>
         <div class="divider"></div>
       </div>
-      <div *ngIf="focusedDoc && (user.canEditStatus || user.uid === focusedDoc.user.profile.uid)">
+      <div *ngIf="focusedDoc && ((user$ | async).canEditStatus || (user$ | async).uid === focusedDoc.user.profile.uid)">
         <h5>แก้ไขไฟล์แนบ</h5>
         <div class="row">
           <div class="col s12 file-field input-field">
@@ -151,7 +151,7 @@
   </form>
 </div>
 <div #modalBatchStatus class="modal">
-  <form [formGroup]="batchStatusForm" *ngIf="user && user.canEditStatus">
+  <form [formGroup]="batchStatusForm" *ngIf="(user$ | async) && (user$ | async).canEditStatus">
     <div class="modal-content">
       <h4>
         แก้ไขสถานะหนังสือ ที่ <span *ngFor="let doc of selectedDocs">{{ doc.number }} </span>

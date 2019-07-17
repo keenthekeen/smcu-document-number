@@ -6,7 +6,18 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router';
 import * as M from 'materialize-css';
 import { EMPTY, interval, Observable, of } from 'rxjs';
-import { finalize, first, map, switchMap, throttle, tap, concat, ignoreElements, filter } from 'rxjs/operators';
+import {
+  concat,
+  filter,
+  finalize,
+  first,
+  ignoreElements,
+  map,
+  shareReplay,
+  switchMap,
+  tap,
+  throttle
+} from 'rxjs/operators';
 import { UserProfile } from '../../user-profile';
 
 @Component({
@@ -31,7 +42,7 @@ export class ListComponent implements OnInit, AfterViewInit {
   batchStatusForm: FormGroup;
   selectedFile: File = null;
   uploadPercent: Observable<number>;
-  user: UserProfile;
+  user$: Observable<UserProfile>;
   selectedDocs: any[] = [];
 
   constructor(
@@ -132,17 +143,13 @@ export class ListComponent implements OnInit, AfterViewInit {
       })
     );
     this.announcement$ = this.afd.object<string>('data/announcement').valueChanges();
-    this.afa.authState.pipe(first()).subscribe(authState => {
-      if (authState) {
-        this.afd
-          .object<UserProfile>(`data/users/${authState.uid}/profile`)
-          .valueChanges()
-          .pipe(first())
-          .subscribe(data => {
-            this.user = data;
-          });
-      }
-    });
+    this.user$ = this.afa.authState.pipe(
+      filter(v => !!v),
+      switchMap(authState => {
+        return this.afd.object<UserProfile>(`data/users/${authState.uid}/profile`).valueChanges();
+      }),
+      shareReplay({ refCount: true })
+    );
   }
 
   ngAfterViewInit(): void {
