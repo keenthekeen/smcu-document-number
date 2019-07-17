@@ -162,10 +162,13 @@ export class ListComponent implements OnInit, AfterViewInit {
     this.storage
       .ref(path)
       .getDownloadURL()
-      .pipe(first())
-      .subscribe(url => {
-        window.location.href = url;
-      });
+      .pipe(
+        first(),
+        tap(url => {
+          window.location.href = url;
+        })
+      )
+      .subscribe();
   }
 
   openStatusModal(doc) {
