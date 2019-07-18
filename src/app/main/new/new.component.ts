@@ -1,10 +1,10 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { AfterViewChecked, Component, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { combineLatest, Observable } from 'rxjs';
-import { finalize, first, map, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { finalize, first, map, switchMap, tap, concat, ignoreElements, shareReplay } from 'rxjs/operators';
 import * as Docxtemplater from 'docxtemplater';
 import * as JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -24,10 +24,11 @@ declare var JSZipUtils: any;
   styleUrls: ['./new.component.scss']
 })
 export class NewComponent implements OnInit, AfterViewChecked {
-  params$: Observable<any>;
+  params$: Observable<[string, string]>;
   year$: Observable<any>;
   category$: Observable<any>;
   divisions: { name: string; value: number }[];
+  divisions$: Observable<{ name: string; value: number }[]>;
   signers: { name: string; title: string; picture_url: string | null }[][] = [[], [], [], []];
   initializedSignerSelect: boolean;
   numberForm: FormGroup;
@@ -35,6 +36,8 @@ export class NewComponent implements OnInit, AfterViewChecked {
   user: UserProfile;
   selectedFile: File = null;
   uploadPercent: Observable<number>;
+
+  @ViewChild('divisionSelect', { static: false }) divisionSelect: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,30 +48,40 @@ export class NewComponent implements OnInit, AfterViewChecked {
   ) {}
 
   ngOnInit() {
-    this.params$ = this.route.params;
-    this.params$.pipe(map(params => params.year)).subscribe(year => {
-      this.afd
-        .object(`data/years/${year}`)
-        .valueChanges()
-        .pipe(first())
-        .subscribe(yearData => {
-          if (!yearData) {
-            const yearNum = parseInt(year, 10);
-            this.afd.database.ref(`data/years/${year}`).set({
-              christian_year: yearNum,
-              buddhist_year: yearNum + 543
-            });
-          }
-        });
-    });
+    this.params$ = this.route.paramMap.pipe(
+      map(s => {
+        return [s.get('year'), s.get('category')];
+      }),
+      switchMap(([year, category]) => {
+        return of([year, category]).pipe(
+          concat(
+            this.afd
+              .object(`data/years/${year}`)
+              .valueChanges()
+              .pipe(
+                tap(yearData => {
+                  if (!yearData) {
+                    const yearNum = parseInt(year, 10);
+                    this.afd.database.ref(`data/years/${year}`).set({
+                      christian_year: yearNum,
+                      buddhist_year: yearNum + 543
+                    });
+                  }
+                })
+              )
+              .pipe(ignoreElements())
+          )
+        ) as Observable<[string, string]>;
+      })
+    );
     this.year$ = this.params$.pipe(
-      switchMap(params => {
-        return this.afd.object(`data/years/${params.year}`).valueChanges();
+      switchMap(([year, _]) => {
+        return this.afd.object(`data/years/${year}`).valueChanges();
       })
     );
     this.category$ = this.params$.pipe(
-      switchMap(params => {
-        return this.afd.object(`data/categories/${params.category}`).valueChanges();
+      switchMap(([_, category]) => {
+        return this.afd.object(`data/categories/${category}`).valueChanges();
       })
     );
     this.afd
@@ -78,6 +91,18 @@ export class NewComponent implements OnInit, AfterViewChecked {
       .subscribe(divisions => {
         this.divisions = divisions;
       });
+    this.divisions$ = this.afd
+      .list('data/divisions')
+      .valueChanges()
+      .pipe(
+        map((divisions: any[]) => divisions.filter(division => division.value !== 0)),
+        tap(_ => {
+          setTimeout(() => {
+            M.FormSelect.init(this.divisionSelect.nativeElement);
+          }, 0);
+        }),
+        shareReplay(1)
+      );
     [1, 2, 3].forEach(num => {
       this.afd
         .list<{ name: string; title: string; picture_url: string | null }>(`data/signers/level_${num}`)
@@ -141,7 +166,7 @@ export class NewComponent implements OnInit, AfterViewChecked {
     M.Collapsible.init(document.querySelectorAll('.collapsible'), {});
     if (this.signers[1].length && this.signers[2].length && this.signers[3].length && !this.initializedSignerSelect) {
       setTimeout(() => {
-        M.FormSelect.init(document.querySelectorAll('select'), {});
+        // M.FormSelect.init(document.querySelectorAll('select'), {});
         M.Autocomplete.init(document.getElementById('gTo'), {
           data: {
             รองคณบดีฝ่ายกิจการนิสิต:
