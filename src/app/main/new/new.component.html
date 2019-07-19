@@ -155,10 +155,10 @@
             </div>
             <div class="row">
               <div class="col s12 input-field">
-                <select formControlName="signer_1" required>
+                <select formControlName="signer_1" required #signer_1>
                   <option value="skip">(ข้าม)</option>
                   <option
-                    *ngFor="let person of signers[1]"
+                    *ngFor="let person of signers$[0] | async"
                     [value]="person.name + '/' + person.title"
                     [attr.data-icon]="person.picture_url"
                     >{{ person.title }}</option
@@ -169,10 +169,10 @@
             </div>
             <div class="row">
               <div class="col s12 input-field">
-                <select formControlName="signer_2" required>
+                <select formControlName="signer_2" required #signer_2>
                   <option value="skip">(ข้าม)</option>
                   <option
-                    *ngFor="let person of signers[2]"
+                    *ngFor="let person of signers$[1] | async"
                     [value]="person.name + '/' + person.title"
                     [attr.data-icon]="person.picture_url"
                     >{{ person.title }}</option
@@ -183,9 +183,9 @@
             </div>
             <div class="row">
               <div class="col s12 input-field">
-                <select formControlName="signer_3" required>
+                <select formControlName="signer_3" required #signer_3>
                   <option
-                    *ngFor="let person of signers[3]"
+                    *ngFor="let person of signers$[2] | async"
                     [value]="person.name + '/' + person.title"
                     [attr.data-icon]="person.picture_url"
                     >{{ person.title }}</option

@@ -1,20 +1,20 @@
-import { ActivatedRoute, Router } from '@angular/router';
-import { AfterViewChecked, Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { AngularFireDatabase } from '@angular/fire/database';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { combineLatest, Observable, of } from 'rxjs';
-import { finalize, first, map, switchMap, tap, concat, ignoreElements, shareReplay } from 'rxjs/operators';
-import * as Docxtemplater from 'docxtemplater';
-import * as JSZip from 'jszip';
-import { saveAs } from 'file-saver';
-import { ThaiDatePipe } from '../../thai-date.pipe';
-import * as M from 'materialize-css';
+import { AngularFireDatabase } from '@angular/fire/database';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { UserProfile } from '../../user-profile';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import * as Docxtemplater from 'docxtemplater';
+import { saveAs } from 'file-saver';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
+import * as JSZip from 'jszip';
+import * as M from 'materialize-css';
+import { combineLatest, Observable, of } from 'rxjs';
+import { concat, finalize, first, ignoreElements, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { mimeToExtension } from '../../../mime-to-extension';
+import { ThaiDatePipe } from '../../thai-date.pipe';
+import { UserProfile } from '../../user-profile';
 
 declare var JSZipUtils: any;
 
@@ -23,13 +23,13 @@ declare var JSZipUtils: any;
   templateUrl: './new.component.html',
   styleUrls: ['./new.component.scss']
 })
-export class NewComponent implements OnInit, AfterViewChecked {
+export class NewComponent implements OnInit, AfterViewInit {
   params$: Observable<[string, string]>;
   year$: Observable<any>;
   category$: Observable<any>;
   divisions: { name: string; value: number }[];
   divisions$: Observable<{ name: string; value: number }[]>;
-  signers: { name: string; title: string; picture_url: string | null }[][] = [[], [], [], []];
+  signers$: Observable<{ name: string; title: string; picture_url: string | null }[]>[];
   initializedSignerSelect: boolean;
   numberForm: FormGroup;
   docForm: FormGroup;
@@ -38,6 +38,9 @@ export class NewComponent implements OnInit, AfterViewChecked {
   uploadPercent: Observable<number>;
 
   @ViewChild('divisionSelect', { static: false }) divisionSelect: ElementRef;
+  @ViewChild('signer_1', { static: false }) signer_1: ElementRef;
+  @ViewChild('signer_2', { static: false }) signer_2: ElementRef;
+  @ViewChild('signer_3', { static: false }) signer_3: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -103,14 +106,19 @@ export class NewComponent implements OnInit, AfterViewChecked {
         }),
         shareReplay(1)
       );
-    [1, 2, 3].forEach(num => {
-      this.afd
+    this.signers$ = [1, 2, 3].map(num => {
+      return this.afd
         .list<{ name: string; title: string; picture_url: string | null }>(`data/signers/level_${num}`)
         .valueChanges()
-        .pipe(first())
-        .subscribe(data => {
-          this.signers[num] = data;
-        });
+        .pipe(
+          tap(_ => {
+            setTimeout(() => {
+              const control = num === 1 ? this.signer_1 : num === 2 ? this.signer_2 : this.signer_3;
+              M.FormSelect.init(control.nativeElement);
+            }, 0);
+          }),
+          shareReplay(1)
+        );
     });
     this.numberForm = new FormGroup({
       name: new FormControl('', Validators.required),
@@ -162,23 +170,19 @@ export class NewComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  ngAfterViewChecked(): void {
+  ngAfterViewInit() {
     M.Collapsible.init(document.querySelectorAll('.collapsible'), {});
-    if (this.signers[1].length && this.signers[2].length && this.signers[3].length && !this.initializedSignerSelect) {
-      setTimeout(() => {
-        // M.FormSelect.init(document.querySelectorAll('select'), {});
-        M.Autocomplete.init(document.getElementById('gTo'), {
-          data: {
-            รองคณบดีฝ่ายกิจการนิสิต:
-              // tslint:disable-next-line: max-line-length
-              'https://firebasestorage.googleapis.com/v0/b/smcu-document-number.appspot.com/o/board-face%2Fpongsak.jpg?alt=media&token=20b6b894-989e-42d0-98d7-d4585bc7ddd2',
-            รองคณบดีฝ่ายบริหาร: null,
-            'รองผู้อำนวยการโรงพยาบาลจุฬาลงกรณ์ ฝ่ายกายภาพ': null
-          }
-        });
-      }, 1200);
-      this.initializedSignerSelect = true;
-    }
+    setTimeout(() => {
+      M.Autocomplete.init(document.getElementById('gTo'), {
+        data: {
+          รองคณบดีฝ่ายกิจการนิสิต:
+            // tslint:disable-next-line: max-line-length
+            'https://firebasestorage.googleapis.com/v0/b/smcu-document-number.appspot.com/o/board-face%2Fpongsak.jpg?alt=media&token=20b6b894-989e-42d0-98d7-d4585bc7ddd2',
+          รองคณบดีฝ่ายบริหาร: null,
+          'รองผู้อำนวยการโรงพยาบาลจุฬาลงกรณ์ ฝ่ายกายภาพ': null
+        }
+      });
+    }, 0);
   }
 
   onFileChange(event) {
