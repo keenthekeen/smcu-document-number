@@ -27,7 +27,6 @@ export class NewComponent implements OnInit, AfterViewInit {
   params$: Observable<[string, string]>;
   year$: Observable<any>;
   category$: Observable<any>;
-  divisions: { name: string; value: number }[];
   divisions$: Observable<{ name: string; value: number }[]>;
   signers$: Observable<{ name: string; title: string; picture_url: string | null }[]>[];
   initializedSignerSelect: boolean;
@@ -89,13 +88,6 @@ export class NewComponent implements OnInit, AfterViewInit {
         return this.afd.object(`data/categories/${category}`).valueChanges();
       })
     );
-    this.afd
-      .list('data/divisions')
-      .valueChanges()
-      .pipe(map((divisions: any[]) => divisions.filter(division => division.value !== 0)))
-      .subscribe(divisions => {
-        this.divisions = divisions;
-      });
     this.divisions$ = this.afd
       .list('data/divisions')
       .valueChanges()
@@ -124,7 +116,7 @@ export class NewComponent implements OnInit, AfterViewInit {
     });
     this.numberForm = new FormGroup({
       name: new FormControl('', Validators.required),
-      divisionId: new FormControl(1, Validators.required),
+      division: new FormControl(null, Validators.required),
       multipleDoc: new FormControl(false),
       numberOfDoc: new FormControl(1)
     });
@@ -196,7 +188,7 @@ export class NewComponent implements OnInit, AfterViewInit {
     if (!this.numberForm.value.multipleDoc) {
       this.numberForm.patchValue({ numberOfDoc: 1 });
     }
-    if (this.numberForm.valid && this.user && this.divisions) {
+    if (this.numberForm.valid && this.user) {
       if (!this.selectedFile) {
         M.toast({ html: 'กรุณาเลือกไฟล์' });
         return;
@@ -247,7 +239,7 @@ export class NewComponent implements OnInit, AfterViewInit {
                 const currentNumber = newNextNumber.snapshot.val() - +numberOfDoc;
 
                 // Get division info (plus sign: convert to number)
-                const division = this.divisions.find(div => +div.value === +this.numberForm.value.divisionId);
+                const division = this.numberForm.value.division;
 
                 // Create new document
                 this.afd
