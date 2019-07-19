@@ -41,6 +41,8 @@ export class NewComponent implements OnInit, AfterViewInit {
   @ViewChild('signer_1', { static: false }) signer_1: ElementRef;
   @ViewChild('signer_2', { static: false }) signer_2: ElementRef;
   @ViewChild('signer_3', { static: false }) signer_3: ElementRef;
+  @ViewChild('gTo', { static: false }) gTo: ElementRef;
+  @ViewChild('collapsible', { static: false }) collapsible: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
@@ -171,9 +173,9 @@ export class NewComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    M.Collapsible.init(document.querySelectorAll('.collapsible'), {});
+    M.Collapsible.init(this.collapsible.nativeElement, {});
     setTimeout(() => {
-      M.Autocomplete.init(document.getElementById('gTo'), {
+      M.Autocomplete.init(this.gTo.nativeElement, {
         data: {
           รองคณบดีฝ่ายกิจการนิสิต:
             // tslint:disable-next-line: max-line-length
