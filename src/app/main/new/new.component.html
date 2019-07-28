@@ -34,7 +34,7 @@
               <div class="col s12">
                 <label>หน่วยงานที่ออกหนังสือ</label>
                 <select formControlName="division" #divisionSelect>
-                  <option *ngFor="let division of divisions$ | async" [value]="division">{{
+                  <option *ngFor="let division of divisions$ | async" [ngValue]="division">{{
                     division.name
                   }}</option>
                 </select>
