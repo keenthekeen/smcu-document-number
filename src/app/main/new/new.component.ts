@@ -8,7 +8,7 @@ import * as Docxtemplater from 'docxtemplater';
 import { saveAs } from 'file-saver';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
-import * as JSZip from 'jszip';
+import * as PizZip from 'pizzip';
 import * as M from 'materialize-css';
 import { combineLatest, Observable, of } from 'rxjs';
 import { concat, finalize, first, ignoreElements, map, shareReplay, switchMap, tap } from 'rxjs/operators';
@@ -287,7 +287,7 @@ export class NewComponent implements OnInit, AfterViewInit {
         if (error) {
           throw error;
         }
-        const zip = new JSZip(content);
+        const zip = new PizZip(content);
         const doc = new Docxtemplater();
         doc.loadZip(zip);
         doc.setOptions({ linebreaks: true });
