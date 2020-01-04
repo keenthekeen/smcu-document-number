@@ -3,7 +3,7 @@
 </div>
 <button
   type="button"
-  class="btn waves-effect waves-light full-width blue"
+  class="btn waves-effect waves-light full-width blue margin-top"
   *ngIf="(user$ | async) && (user$ | async).canEditStatus"
   [disabled]="selectedDocs.length < 1"
   (click)="openBatchStatusModal()"
