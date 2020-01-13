@@ -232,7 +232,7 @@ export class NewComponent implements OnInit, AfterViewInit {
                     if (a) {
                       return a + +numberOfDoc;
                     } else {
-                      return 1;
+                      return 2;
                     }
                   });
 
