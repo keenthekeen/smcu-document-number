@@ -36,12 +36,12 @@ export class NewComponent implements OnInit, AfterViewInit {
   selectedFile: File = null;
   uploadPercent: Observable<number>;
 
-  @ViewChild('divisionSelect', { static: false }) divisionSelect: ElementRef;
-  @ViewChild('signer_1', { static: false }) signer_1: ElementRef;
-  @ViewChild('signer_2', { static: false }) signer_2: ElementRef;
-  @ViewChild('signer_3', { static: false }) signer_3: ElementRef;
-  @ViewChild('gTo', { static: false }) gTo: ElementRef;
-  @ViewChild('collapsible', { static: false }) collapsible: ElementRef;
+  @ViewChild('divisionSelect') divisionSelect: ElementRef;
+  @ViewChild('signer_1') signer_1: ElementRef;
+  @ViewChild('signer_2') signer_2: ElementRef;
+  @ViewChild('signer_3') signer_3: ElementRef;
+  @ViewChild('gTo') gTo: ElementRef;
+  @ViewChild('collapsible') collapsible: ElementRef;
 
   constructor(
     private route: ActivatedRoute,

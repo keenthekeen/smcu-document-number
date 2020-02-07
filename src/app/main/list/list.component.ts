@@ -26,9 +26,9 @@ import { UserProfile } from '../../user-profile';
   styleUrls: ['./list.component.scss']
 })
 export class ListComponent implements OnInit, AfterViewInit {
-  @ViewChild('floatBtn', { static: false }) floatBtn: ElementRef;
-  @ViewChild('modalStatus', { static: false }) modalStatus: ElementRef;
-  @ViewChild('modalBatchStatus', { static: false }) modalBatchStatus: ElementRef;
+  @ViewChild('floatBtn') floatBtn: ElementRef;
+  @ViewChild('modalStatus') modalStatus: ElementRef;
+  @ViewChild('modalBatchStatus') modalBatchStatus: ElementRef;
 
   params$: Observable<[string, string]>;
   documents$: Observable<any[]>;
