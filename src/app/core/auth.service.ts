@@ -13,11 +13,11 @@ export class AuthService {
       hd: 'docchula.com',
       prompt: 'select_account'
     });
-    this.afa.auth.signInWithRedirect(provider);
+    this.afa.signInWithRedirect(provider);
   }
 
   logout() {
-    this.afa.auth.signOut().then(() => {
+    this.afa.signOut().then(() => {
       this.router.navigate(['/']);
     });
   }
