@@ -10,6 +10,7 @@ import { HomeComponent } from './home/home.component';
 import { ThaiDatePipe } from './thai-date.pipe';
 
 import 'firebase/database';
+import 'firebase/storage';
 
 @NgModule({
   declarations: [AppComponent, HomeComponent, ThaiDatePipe],
